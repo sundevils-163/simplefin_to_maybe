@@ -11,6 +11,8 @@ A project to synchronize transaction data from [SimpleFIN](https://beta-bridge.s
 ## Quick-Start Steps
 
 1. `git clone git@github.com:steveredden/simplefin_to_maybe.git`
+1. `cd simplefin_to_maybe`
+1. `bundle install`
 1. Rename `.env.example` to `.env` and fill out each environment variable
 1. `ruby ./bin/simplefin_to_maybe.rb
 
