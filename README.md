@@ -17,7 +17,7 @@ A project to synchronize transaction data from [SimpleFIN](https://beta-bridge.s
 
 > [!NOTE]
 > `SIMPLEFIN_USERNAME` and `SIMPLEFIN_PASSWORD` are the 64-character strings separated by a colon (`:`) \
-> &nbsp;&nbsp;Follow the link in the Pre-requisites for instructions
+> &nbsp;Follow the link in the Pre-requisites for instructions
 
 ## Execution Steps
 
