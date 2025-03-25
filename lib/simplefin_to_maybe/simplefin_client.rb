@@ -20,7 +20,7 @@ module SimpleFINToMaybe
       uri = URI.parse("#{BASE_URL}#{endpoint}")
       uri.query = URI.encode_www_form(query_params) unless query_params.empty?
 
-      puts "Requesting: #{uri}"
+      #puts "Requesting: #{uri}"
 
       # Perform HTTP request with basic authentication
       request = Net::HTTP::Get.new(uri)
