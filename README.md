@@ -16,7 +16,7 @@ A project to synchronize transaction data from [SimpleFIN](https://beta-bridge.s
 1. Rename `.env.example` to `.env` and fill out each environment variable
 
 > [!NOTE]
-> `SIMPLEFIN_USERNAME` and `SIMPLEFIN_PASSWORD` are the 64-character strings separated by a colon (`:`)
+> `SIMPLEFIN_USERNAME` and `SIMPLEFIN_PASSWORD` are the 64-character strings separated by a colon (`:`) \
 > Follow the link in the Pre-requisites for generation instructions
 
 ## Execution Steps
