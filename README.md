@@ -67,6 +67,8 @@ The SimpleFIN account uuid (removing the leading `ACT-`) is "stuffed" as the `im
 
 ![imports](docs/assets/images/imports.png)
 
+It is also inserted into the `acounts.import_id` table and column.
+
 > [!IMPORTANT]
 > **Do not edit or delete these import records!**
 
