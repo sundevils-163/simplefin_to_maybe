@@ -8,12 +8,15 @@ A project to synchronize transaction data from [SimpleFIN](https://beta-bridge.s
 1. A SimpleFIN [Access Token (Step 2)](https://beta-bridge.simplefin.org/info/developers)
 1. An exposed port to your self-hosted Maybe instance's PostgreSQL container/database
 
-## Quick-Start / Execution Steps
+## Installation
 
 1. `git clone https://github.com/steveredden/simplefin_to_maybe.git`
 1. `cd simplefin_to_maybe`
 1. `bundle install`
 1. Rename `.env.example` to `.env` and fill out each environment variable
+
+## Execution Steps
+
 1. `ruby ./bin/simplefin_to_maybe.rb`
 
 ## Workflow
@@ -61,7 +64,7 @@ The SimpleFIN account uuid (removing the leading `ACT-`) is "stuffed" as the `im
 ![imports](docs/assets/images/imports.png)
 
 > [!IMPORTANT]
-> **Do not delete these import records!**
+> **Do not edit or delete these import records!**
 
 Similarly, the SimpleFIN transaction uuid is "stuffed" into the `account_entries.plaid_id` table and column:
 
@@ -71,4 +74,4 @@ Similarly, the SimpleFIN transaction uuid is "stuffed" into the `account_entries
 
 - [x] Transactions
 - [ ] Securities Trades
-- [ ] Much more...
+- [ ] More...?
