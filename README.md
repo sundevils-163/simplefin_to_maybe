@@ -10,7 +10,7 @@ A project to synchronize transaction data from [SimpleFIN](https://beta-bridge.s
 
 ## Quick-Start / Execution Steps
 
-1. `git clone git@github.com:steveredden/simplefin_to_maybe.git`
+1. `git clone https://github.com/steveredden/simplefin_to_maybe.git`
 1. `cd simplefin_to_maybe`
 1. `bundle install`
 1. Rename `.env.example` to `.env` and fill out each environment variable
