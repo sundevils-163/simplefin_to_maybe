@@ -15,6 +15,9 @@ A project to synchronize transaction data from [SimpleFIN](https://beta-bridge.s
 1. `bundle install`
 1. Rename `.env.example` to `.env` and fill out each environment variable
 
+> [!NOTE]
+> `SIMPLEFIN_USERNAME` and `SIMPLEFIN_PASSWORD` are 64-character strings separated by a colon (`:`)
+
 ## Execution Steps
 
 1. `ruby ./bin/simplefin_to_maybe.rb`
