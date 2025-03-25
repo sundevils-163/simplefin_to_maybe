@@ -8,17 +8,63 @@ A project to synchronize transaction data from [SimpleFIN](https://beta-bridge.s
 1. A SimpleFIN [Access Token (Step 2)](https://beta-bridge.simplefin.org/info/developers)
 1. An exposed port to your self-hosted Maybe instance's PostgreSQL container/database
 
-## Quick-Start Steps
+## Quick-Start / Execution Steps
 
 1. `git clone git@github.com:steveredden/simplefin_to_maybe.git`
 1. `cd simplefin_to_maybe`
 1. `bundle install`
 1. Rename `.env.example` to `.env` and fill out each environment variable
-1. `ruby ./bin/simplefin_to_maybe.rb
+1. `ruby ./bin/simplefin_to_maybe.rb`
 
 ## Workflow
 
-The utility requires that you create your various accounts in Maybe before running the utility.
+The utility requires that you have created your various accounts in Maybe before execution:
 
-The utility will interact with the PostgreSQL database, retrieving your `family` id, and any accounts created in your instance.
+![staged accounts](docs/assets/images/staged-accounts.png) \
+&nbsp;&nbsp;&nbsp;&nbsp;*Staged accounts in Maybe*
 
+The utility will interact with the PostgreSQL database, retrieving your `family` id, and any accounts created in your instance.  It also retrieves all accounts connected in your SimpleFIN account.
+
+![account enumeration](docs/assets/images/account-enumeration.png) \
+&nbsp;&nbsp;&nbsp;&nbsp;*Execution and retrieval of accounts*
+
+Next, you must associate each SimpleFIN account with the Maybe account by selecting an option:
+
+![account linking](docs/assets/images/account-linking.png) \
+&nbsp;&nbsp;&nbsp;&nbsp;*Choose `2` to link these accounts, or `Q` to skip this account*
+
+The utility will retrieve any existing and previously-synchronized transactions, and insert anything new:
+
+![transaction retrieval](docs/assets/images/transaction-retrieval.png) \
+&nbsp;&nbsp;&nbsp;&nbsp;*Inserting any new transactions*
+
+The utility will continue to loop through all SimpleFIN accounts, asking for linkages, and synchronizing all new transactions:
+
+![transaction retrieval](docs/assets/images/account-linking-again.png) \
+&nbsp;&nbsp;&nbsp;&nbsp;*Un-linked accounts are presented as candidates, and new transactions are synchronized*
+
+The account linkage is saved within the PostgreSQL database, so during subsequent executions you will not need to re-associate accounts.
+
+After completion be sure to manually `Sync Account` in the Maybe web interface:
+
+![Sync Account](docs/assets/images/account-sync.png) \
+&nbsp;&nbsp;&nbsp;&nbsp;*Syncing forces balance calculations*
+
+## Technical Details
+
+The utility "stuffs" the SimpleFIN-account-to-Maybe-account linkage in the `imports` PostgreSQL table as `Mint Import` records:
+
+![Account Mint Imports](docs/assets/images/import-records.png)
+
+> [!IMPORTANT]
+> **Do not delete these import records!**
+
+Similarly, the SimpleFIN transaction uuid is "stuffed" into the `transactions.plaid_id` table and column:
+
+![account_entries](docs/assets/images/account_entries-table.png)
+
+## To Do
+
+- [x] Transactions
+- [ ] Securities Trades
+- [ ] Much more...
