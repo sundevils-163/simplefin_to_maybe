@@ -80,4 +80,7 @@ Similarly, the SimpleFIN transaction uuid is "stuffed" into the `account_entries
 
 - [x] Transactions
 - [ ] Securities Trades
+- [ ] Holdings
+- [ ] Docker Compose?
+- [ ] Web UI?
 - [ ] More...?
