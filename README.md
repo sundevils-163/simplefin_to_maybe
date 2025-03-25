@@ -52,14 +52,18 @@ After completion be sure to manually `Sync Account` in the Maybe web interface:
 
 ## Technical Details
 
-The utility "stuffs" the SimpleFIN-account-to-Maybe-account linkage in the `imports` PostgreSQL table as `Mint Import` records:
+The utility stores the SimpleFIN-account-to-Maybe-account linkage as a `Mint Import`:
 
 ![Account Mint Imports](docs/assets/images/import-records.png)
+
+The SimpleFIN account uuid (removing the leading `ACT-`) is "stuffed" as the `imports.id` uuid:
+
+![imports](docs/assets/images/imports.png)
 
 > [!IMPORTANT]
 > **Do not delete these import records!**
 
-Similarly, the SimpleFIN transaction uuid is "stuffed" into the `transactions.plaid_id` table and column:
+Similarly, the SimpleFIN transaction uuid is "stuffed" into the `account_entries.plaid_id` table and column:
 
 ![account_entries](docs/assets/images/account_entries-table.png)
 
