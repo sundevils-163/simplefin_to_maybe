@@ -1,7 +1,8 @@
 #lib/simplefil_to_maybe/simplefin_client.rb
 
-require 'net/http'
+require 'colorize'
 require 'json'
+require 'net/http'
 require 'uri'
 
 require_relative "utils"
@@ -57,7 +58,11 @@ module SimpleFINToMaybe
     def handle_response(response)
       case response.code.to_i
       when 200
-        JSON.parse(response.body)
+        output = JSON.parse(response.body)
+        output.dig("errors").each do |warnings|
+          puts " - #{warnings}".colorize(:yellow)  #simplefin warnings
+        end
+        return output
       else
         raise "Error: #{response.code} - #{response.body}"
       end
