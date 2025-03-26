@@ -35,6 +35,12 @@ The utility will interact with the PostgreSQL database, retrieving your `family`
 ![account enumeration](docs/assets/images/account-enumeration.png) \
 &nbsp;&nbsp;&nbsp;&nbsp;*Execution and retrieval of accounts*
 
+> [!NOTE]
+> Currently, only strictly transaction-based account types are able to be synchronized:
+> - Depository
+> - CreditCard
+> - Loan
+
 Next, you must associate each SimpleFIN account with the Maybe account by selecting an option:
 
 ![account linking](docs/assets/images/account-linking.png) \

@@ -18,6 +18,11 @@ return if family_id.nil?
 puts "Connected to family #{family.dig("name")} (#{family_id})"
 
 maybe_accounts = maybe_client.get_accounts(family_id)
+
+# v0.0.1 restriction:  Only handle strictly transaction-based types (no holdings/trades)
+allowed_types = ["Depository", "CreditCard", "Loan"]
+maybe_accounts = maybe_accounts.select { |account| allowed_types.include?(account["accountable_type"]) }
+
 puts "Found #{maybe_accounts.length} Maybe account(s)!"
 return if 0 == maybe_accounts.length
 
