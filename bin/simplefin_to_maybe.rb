@@ -21,7 +21,7 @@ maybe_accounts = maybe_client.get_accounts(family_id)
 
 # v0.0.1 restriction:  Only handle strictly transaction-based types (no holdings/trades)
 allowed_types = ["Depository", "CreditCard", "Loan"]
-maybe_accounts = maybe_accounts.select { |account| allowed_types.include?(account["accountable_type"]) }
+maybe_accounts = maybe_accounts.select { |account| allowed_types.include?(account.dig("accountable_type")) }
 
 puts "Found #{maybe_accounts.length} Maybe account(s)!"
 return if 0 == maybe_accounts.length
@@ -70,13 +70,14 @@ if simplefin_accounts.is_a?(Array)
       account_row = make_selection(unmatched_maybe_accounts, "name", "Please select a Maybe account to associate '#{simplefin_display_name}':")
 
       next if account_row.nil?  # skip iteration if we didn't make an association
-        maybe_account_id = maybe_client.new_simplefin_import(account_row, simplefin_id)
-        maybe_accounts = maybe_client.get_accounts(family_id)  # update accounts so the unmatched_maybe_accounts reflects new associations
+
+      maybe_account_id = maybe_client.new_simplefin_import(account_row, simplefin_id)
+      maybe_accounts = maybe_client.get_accounts(family_id)  # update accounts so the unmatched_maybe_accounts reflects new associations
     else
       maybe_account_id = maybe_account.dig("id")
       puts "Found associated Maybe account: #{maybe_account.dig("name")} (#{maybe_account_id})"
     end
-  
+
     # get all simplefin transactions for the calendar month
     puts ""
     puts "Gathering transactions since #{get_first_of_month()}..."
