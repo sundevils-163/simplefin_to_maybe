@@ -32,6 +32,10 @@ puts "Connecting to SimpleFIN Bridge..."
 simplefin_client = SimpleFINToMaybe::SimpleFINClient.new
 
 simplefin_accounts = simplefin_client.get_all_accounts
+
+skip_accounts = (ENV['EXCLUDED_SIMPLEFIN_ACCOUNT_IDS'] || "").split(",")
+simplefin_accounts = simplefin_accounts.reject { |account| skip_accounts.include?(account.dig("id").to_s) }
+
 puts "Found #{simplefin_accounts.length} SimpleFIN account(s)!"
 return if 0 == simplefin_accounts.length
 puts "Beginning account enumeration..."
