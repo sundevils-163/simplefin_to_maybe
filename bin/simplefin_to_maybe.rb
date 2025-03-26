@@ -20,7 +20,7 @@ puts "Connected to family #{family.dig("name")} (#{family_id})"
 maybe_accounts = maybe_client.get_accounts(family_id)
 
 # v0.0.1 restriction:  Only handle strictly transaction-based types (no holdings/trades)
-allowed_types = ["Depository", "CreditCard", "Loan"]
+allowed_types = ["Depository", "CreditCard", "Loan", "Investment"]
 maybe_accounts = maybe_accounts.select { |account| allowed_types.include?(account.dig("accountable_type")) }
 
 puts "Found #{maybe_accounts.length} Maybe account(s)!"
@@ -73,9 +73,16 @@ if simplefin_accounts.is_a?(Array)
 
       maybe_account_id = maybe_client.new_simplefin_import(account_row, simplefin_id)
       maybe_accounts = maybe_client.get_accounts(family_id)  # update accounts so the unmatched_maybe_accounts reflects new associations
+      maybe_account = account_row
     else
       maybe_account_id = maybe_account.dig("id")
       puts "Found associated Maybe account: #{maybe_account.dig("name")} (#{maybe_account_id})"
+    end
+
+    # for investment accounts, only update balance (simplefin trade / holdings still WIP)
+    if maybe_account["accountable_type"] == "Investment"
+        maybe_client.upsert_account_valuation(maybe_account_id, simplefin_account)
+      next
     end
 
     # get all simplefin transactions for the calendar month

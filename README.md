@@ -36,10 +36,13 @@ The utility will interact with the PostgreSQL database, retrieving your `family`
 &nbsp;&nbsp;&nbsp;&nbsp;*Execution and retrieval of accounts*
 
 > [!NOTE]
-> Currently, only strictly transaction-based account types are able to be synchronized:
+> Currently, `transactions` are only synchronized for the following account types:
 > - Depository
 > - CreditCard
 > - Loan
+>
+> Date-based `balance` updates (no transactions/trades) are performed for the following account types:
+> - Investment
 
 Next, you must associate each SimpleFIN account with the Maybe account by selecting an option:
 
@@ -87,8 +90,8 @@ Similarly, the SimpleFIN transaction uuid is "stuffed" into the `account_entries
 ## To Do
 
 - [x] Transactions
-- [ ] Securities Trades
-- [ ] Holdings
+- [x] Balances
+- [ ] Securities/Trades/Holdings
 - [ ] Docker Compose?
 - [ ] Web UI?
 - [ ] More...?

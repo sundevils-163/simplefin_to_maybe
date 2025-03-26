@@ -135,6 +135,64 @@ module SimpleFINToMaybe
 
       return account_id
     end
+
+    def upsert_account_valuation(account_id, simplefin_account)
+      valuation_uuid = SecureRandom.uuid
+      amount = simplefin_account.dig("balance")
+      currency = simplefin_account.dig("currency")
+      date = simplefin_account.dig("balance-date")
+    
+      # Check if a row exists with the same account_id and date
+      select_query = <<-SQL
+        SELECT id FROM public.account_entries 
+        WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) LIMIT 1;
+      SQL
+      existing_entry = execute(select_query, [account_id, date]).first
+    
+      if existing_entry
+        # Update existing row
+         
+        puts "Updating Balance..."
+
+        valuation_uuid = existing_entry["id"]
+        update_query = <<-SQL
+          UPDATE public.account_entries 
+          SET amount = $1, updated_at = NOW()
+          WHERE id = $2;
+        SQL
+        execute(update_query, [amount, valuation_uuid])
+
+        # also update account_valuations timestamp
+        valuation_update_query = <<-SQL
+          UPDATE public.account_valuations
+          SET updated_at = NOW()
+          WHERE id = $1;
+        SQL
+        execute(valuation_update_query, [valuation_uuid])
+      else
+        # Insert new row
+        
+        puts "Adding a Balance Update..."
+
+        insert_query = <<-SQL
+          INSERT INTO public.account_entries (
+            account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at
+          ) VALUES (
+            $1, 'Account::Valuation', $2, $3, $4, (TO_TIMESTAMP($5)::DATE), 'Balance Update', NOW(), NOW()
+          );
+        SQL
+        execute(insert_query, [account_id, valuation_uuid, amount, currency, date])
+
+        insert_valuation_query = <<-SQL
+          INSERT INTO public.account_valuations (
+            id, created_at, updated_at
+          ) VALUES (
+            $1, NOW(), NOW()
+          );
+        SQL
+        execute(insert_valuation_query, [valuation_uuid])
+      end
+    end
     
     # client.new_transaction('5a6c6582-6ff0-48b9-9106-1e5cc02c094e', '11.1100', 'USD', '2025-03-11', 'transaction6', 'TRN-abc123')
     def new_transaction(account_id, amount, short_date, display_name, simplefin_txn_id, currency = "USD")
