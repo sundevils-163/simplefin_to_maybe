@@ -58,7 +58,7 @@ module SimpleFINToMaybe
       execute(query, [family_id])
     end
     
-    def get_simplefin_transactions(account_id, start_date = get_first_of_month())
+    def get_simplefin_transactions(account_id, start_date = get_lookback_date())
       query = <<-SQL
         SELECT plaid_id FROM public.account_entries
         WHERE account_id = $1

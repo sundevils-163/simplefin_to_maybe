@@ -42,7 +42,7 @@ module SimpleFINToMaybe
     end
 
     # Method to fetch all transactions for a specific account within a date range
-    def get_all_transactions(account_id, start_date = get_first_of_month(epoch: true), end_date = get_epoch_of_tomorrow())
+    def get_all_transactions(account_id, start_date = get_lookback_date(epoch: true), end_date = get_epoch_of_tomorrow())
       query_params = {
         "start-date" => start_date,
         "end-date" => end_date,

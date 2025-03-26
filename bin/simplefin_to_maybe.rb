@@ -80,13 +80,13 @@ if simplefin_accounts.is_a?(Array)
 
     # get all simplefin transactions for the calendar month
     puts ""
-    puts "Gathering transactions since #{get_first_of_month()}..."
-    start_date_epoch = get_first_of_month(epoch: true)
+    puts "Gathering transactions since #{get_lookback_date()}..."
+    start_date_epoch = get_lookback_date(epoch: true)
     simplefin_transactions = simplefin_client.get_all_transactions(simplefin_account_uuid, start_date_epoch)
     puts "Found #{simplefin_transactions.length} SimpleFIN transaction(s)!"
 
     # get all transactions we've already sync'd into maybe
-    start_date_mmddYY = get_first_of_month()
+    start_date_mmddYY = get_lookback_date(tz: "UTC")
     existing_maybe_transactions = maybe_client.get_simplefin_transactions(maybe_account_id, start_date_mmddYY)
     puts "Found #{existing_maybe_transactions.length} Maybe transaction(s) for this account!"
 

@@ -3,7 +3,7 @@
 require "active_support/all"
 require 'io/console'
 
-def convert_timestamp_to_mmddyyyy(input, tz = ENV["TIMEZONE"] || "UTC")
+def convert_timestamp_to_mmddyyyy(input, tz = ENV['TIMEZONE'] || "UTC")
   time = Time.at(input)
   time_with_zone = time.in_time_zone(tz)
   return time_with_zone.strftime("%m/%d/%Y")
@@ -20,6 +20,16 @@ def get_first_of_month(epoch = false)
     return first_of_month.to_i
   else
     return convert_timestamp_to_mmddyyyy(first_of_month)
+  end
+end
+
+def get_lookback_date(lookback_days: (ENV['LOOKBACK_DAYS'] || 30).to_i, epoch: false, tz: ENV['TIMEZONE'] || "UTC")
+  now = Time.now - (lookback_days * 24 * 60 * 60)
+  
+  if epoch
+    return now.to_i
+  else
+    return convert_timestamp_to_mmddyyyy(now, tz)
   end
 end
 
