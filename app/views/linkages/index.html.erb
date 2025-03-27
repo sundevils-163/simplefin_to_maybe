@@ -1,4 +1,106 @@
-<div>
-  <h1 class="font-bold text-4xl">Linkages#index</h1>
-  <p>Find me in app/views/linkages/index.html.erb</p>
-</div>
+<h2 class="text-2xl font-medium text-gray-700 mb-4">Manage Linkages</h2>
+
+<table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+  <thead>
+    <tr class="bg-gray-200">
+      <th class="text-left py-2 px-4 border-b">SimpleFIN Account</th>
+      <th class="text-center py-2 px-4 border-b">Lock</th>
+      <th class="text-left py-2 px-4 border-b">Maybe Account</th>
+      <th class="text-center py-2 px-4 border-b">Sync</th>
+    </tr>
+  </thead>
+  <tbody id="linkages-body">
+    <!-- Existing Linkages -->
+    <% @linkages.each do |linkage| %>
+      <tr>
+        <td class="py-2 px-4 border-b">
+          <select class="simplefin-select bg-gray-100 px-2 py-1 rounded w-full" disabled>
+            <option selected><%= linkage.simplefin_account.display_name %></option>
+          </select>
+        </td>
+        <td class="text-center py-2 px-4 border-b">
+          <button class="toggle-lock text-gray-500"><i class="fas fa-lock"></i></button>
+        </td>
+        <td class="py-2 px-4 border-b">
+          <select class="maybe-select bg-gray-100 px-2 py-1 rounded w-full" disabled>
+            <option selected><%= linkage.maybe_account.display_name %></option>
+          </select>
+        </td>
+        <td class="text-center py-2 px-4 border-b">
+          <button class="sync-btn text-blue-500 hover:text-blue-700" data-id="<%= linkage.id %>">
+            <i class="fas fa-sync"></i>
+          </button>
+        </td>
+      </tr>
+    <% end %>
+
+    <!-- New Row for Creating Linkages -->
+    <tr class="new-linkage-row">
+      <td class="py-2 px-4 border-b">
+        <select class="new-simplefin bg-white border px-2 py-1 rounded w-full">
+          <option value="">Select SimpleFIN Account</option>
+          <% @unlinked_simplefin_accounts.each do |account| %>
+            <option value="<%= account.id %>"><%= account.display_name %></option>
+          <% end %>
+        </select>
+      </td>
+      <td class="text-center py-2 px-4 border-b">
+        <button class="toggle-lock text-gray-500"><i class="fas fa-lock-open"></i></button>
+      </td>
+      <td class="py-2 px-4 border-b">
+        <select class="new-maybe bg-white border px-2 py-1 rounded w-full">
+          <option value="">Select Maybe Account</option>
+          <% @unlinked_maybe_accounts.each do |account| %>
+            <option value="<%= account.id %>"><%= account.display_name %></option>
+          <% end %>
+        </select>
+      </td>
+      <td class="text-center py-2 px-4 border-b">
+        <button class="create-linkage-btn text-green-500 hover:text-green-700">
+          <i class="fas fa-plus"></i>
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Lock/Unlock Toggle
+    document.querySelectorAll(".toggle-lock").forEach(btn => {
+      btn.addEventListener("click", function () {
+        let row = this.closest("tr");
+        let selects = row.querySelectorAll("select");
+        let icon = this.querySelector("i");
+
+        if (selects[0].disabled) {
+          selects.forEach(select => select.removeAttribute("disabled"));
+          icon.classList.replace("fa-lock", "fa-lock-open");
+        } else {
+          selects.forEach(select => select.setAttribute("disabled", true));
+          icon.classList.replace("fa-lock-open", "fa-lock");
+        }
+      });
+    });
+
+    // Create New Linkage
+    document.querySelector(".create-linkage-btn").addEventListener("click", function () {
+      let simplefinId = document.querySelector(".new-simplefin").value;
+      let maybeId = document.querySelector(".new-maybe").value;
+
+      if (!simplefinId || !maybeId) {
+        alert("Please select both accounts before linking.");
+        return;
+      }
+
+      fetch("/linkages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content },
+        body: JSON.stringify({ linkage: { simplefin_account_id: simplefinId, maybe_account_id: maybeId } })
+      })
+      .then(response => response.json())
+      .then(data => location.reload()) // Refresh page on success
+      .catch(error => console.error("Error:", error));
+    });
+  });
+</script>

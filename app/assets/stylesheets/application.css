@@ -13,7 +13,61 @@
  *= require_tree .
  *= require_self
  */
+
 .spinner {
-    width: 2%;
-    height: auto;
+  width: 2.5%;
+  height: auto;
+}
+
+.blinking-undefined {
+  color: lightcoral;
+  animation: blink 1s infinite alternate;
+}
+@keyframes blink {
+  0% { opacity: 1; }
+  100% {opacity: 0.5; }
+}
+
+.settings-table {
+  width: 700px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.settings-table th {
+  background-color: #f4f4f4;
+  padding: 7px;
+}
+.settings-table td {
+  padding: 4px;
+}
+
+/* Modal styling */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Background overlay */
+}
+
+/* Modal content styling */
+.modal-content {
+  position: relative;
+  background-color: white;
+  margin: 15% auto;
+  padding: 20px;
+  width: 60%;
+  border-radius: 8px;
+}
+
+/* Close button styling */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
 }

@@ -1,4 +1,4 @@
-#app/lib/simplefin_client.rb
+# app/lib/simplefin_client.rb
 
 require 'json'
 require 'net/http'
@@ -13,9 +13,9 @@ class SimplefinClient
   end
 
   # Method to fetch all accounts
-  def get_accounts()
+  def get_accounts
     query_params = { "balances-only" => 1 }
-    return invoke_request("/accounts", query_params)
+    invoke_request("/accounts", query_params)
   end
 
   # Method to fetch all transactions for a specific account within a date range
@@ -24,8 +24,7 @@ class SimplefinClient
       "start-date" => start_date,
       "account" => URI.encode_www_form_component(account_id)
     }
-    response = invoke_request("/accounts", query_params)
-    response.dig("accounts", 0, "transactions") || []
+    invoke_request("/accounts", query_params)
   end
 
   private
@@ -46,13 +45,16 @@ class SimplefinClient
     handle_response(response)
   end
 
-  # Handles API responses and errors
+  # Handles API responses and errors, returns structured data
   def handle_response(response)
-    case response.code.to_i
-    when 200
-      return JSON.parse(response.body)
-    else
-      raise "Error: #{response.code} - #{response.body}"
-    end
+    parsed_body = JSON.parse(response.body) rescue nil
+
+    # Return a structured hash with status code, response body, and success flag
+    {
+      status_code: response.code.to_i,
+      response: parsed_body,
+      success: response.code.to_i == 200,
+      error_message: parsed_body ? parsed_body["errors"] : nil
+    }
   end
 end

@@ -1,149 +1,250 @@
-<h1>Settings</h1>
-
 <!-- Simplefin Settings Table -->
-<h2>SimpleFIN Settings</h2>
-<table>
+<br>
+<h2 class="text-2xl font-medium text-gray-700 mb-4">SimpleFIN Settings</h1>
+<table class="settings-table">
   <thead>
     <tr>
-      <th>Key</th>
-      <th>Value</th>
-      <th>Action</th>
+      <th class="text-left border">Setting</th>
+      <th class="text-right border">Value</th>
     </tr>
   </thead>
   <tbody>
+    <% ["simplefin_username", "simplefin_password"].each do |key| %>
+      <% setting = Setting.find_by(key: key) %>
+      <% if setting %>
+        <tr>
+          <td class="text-left border"><%= setting.display_name %></td>
+          <td class="text-right border">
+            <% if setting.value.present? %>
+              *********
+            <% else %>
+              <span class="blinking-undefined">undefined</span>
+            <% end %>
+          </td>
+          <td class="w-auto border-none">
+            <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" display-name="<%= setting.display_name %>" data-key="<%= setting.key %>" data-value="<%= setting.value %>" ecrypted="<%= setting.encrypted %>">Edit</button>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
     <tr>
-      <td>SimpleFIN Username</td>
-      <td><%= Setting.find_by(key: 'simplefin_username')&.value %></td>
-      <td>
-        <%= link_to 'Edit', edit_setting_path(Setting.find_by(key: 'simplefin_username')) %>
-      </td>
-    </tr>
-    <tr>
-      <td>SimpleFIN Password</td>
-      <td><%= Setting.find_by(key: 'simplefin_password')&.value %></td>
-      <td>
-        <%= link_to 'Edit', edit_setting_path(Setting.find_by(key: 'simplefin_password')) %>
+      <td class="text-left border">Accounts Retrieved</td>
+      <td class="text-right border">
+        <%= link_to accounts_path, class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
+          <%= Account.where(account_type: "simplefin").count %>
+        <% end %>
       </td>
     </tr>
   </tbody>
 </table>
 
-<button id="test_simplefin_button">Test SimpleFIN</button>
-<img id="loading-spinner" style="display: none;" src="<%= asset_path('fe718d-transparent-spinner.gif') %>" alt="Loading..." class="spinner" />
-<div id="simplefin_test_result"></div>
+<br>
+<button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" id="test_simplefin_button">Retrieve SimpleFIN Accounts</button>
+<img id="simplefin_loading_spinner" style="display: none;" src="<%= asset_path('fe718d-transparent-spinner.gif') %>" alt="Loading..." class="spinner" />
+<br><div id="simplefin_test_result"></div><br><br>
 
 <!-- Database Settings Table -->
-<h2>Maybe Settings</h2>
-<table>
+<h2 class="text-2xl font-medium text-gray-700 mb-4">Maybe Settings</h1>
+<table class="settings-table">
   <thead>
     <tr>
-      <th>Key</th>
-      <th>Value</th>
-      <th>Action</th>
+      <th class="text-left border">Setting</th>
+      <th class="text-right border">Value</th>
     </tr>
   </thead>
   <tbody>
+    <% ["maybe_postgres_host", "maybe_postgres_port", "maybe_postgres_db", "maybe_postgres_user"].each do |key| %>
+      <% setting = Setting.find_by(key: key) %>
+      <% if setting %>
+        <tr>
+          <td class="text-left border"><%= setting.display_name %></td>
+          <td class="text-right border"><%= setting.value %></td>
+          <td class="w-auto border-none">
+            <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" display-name="<%= setting.display_name %>" data-key="<%= setting.key %>" data-value="<%= setting.value %>">Edit</button>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+    <% setting = Setting.find_by(key: "maybe_postgres_password") %>
+    <% if setting %>
+      <tr>
+        <td class="text-left border"><%= setting.display_name %></td>
+        <td class="text-right border">
+          <% if setting.value.present? %>
+            *********
+          <% else %>
+            <span class="blinking-undefined">undefined</span>
+          <% end %>
+        </td>
+        <td class="w-auto border-none">
+          <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" display-name="<%= setting.display_name %>" data-key="<%= setting.key %>" data-value="<%= setting.value %>">Edit</button>
+        </td>
+      </tr>
+    <% end %>
     <tr>
-      <td>Maybe PostgreSQL Host</td>
-      <td><%= Setting.find_by(key: 'maybe_postgres_host')&.value %></td>
-      <td>
-        <%= link_to 'Edit', edit_setting_path(Setting.find_by(key: 'maybe_postgres_host')) %>
-      </td>
-    </tr>
-    <tr>
-      <td>Maybe PostgreSQL Port</td>
-      <td><%= Setting.find_by(key: 'maybe_postgres_port')&.value %></td>
-      <td>
-        <%= link_to 'Edit', edit_setting_path(Setting.find_by(key: 'maybe_postgres_port')) %>
-      </td>
-    </tr>
-    <tr>
-      <td>Maybe PostgreSQL Database</td>
-      <td><%= Setting.find_by(key: 'maybe_postgres_db')&.value %></td>
-      <td>
-        <%= link_to 'Edit', edit_setting_path(Setting.find_by(key: 'maybe_postgres_db')) %>
-      </td>
-    </tr>
-    <tr>
-      <td>Maybe PostgreSQL User</td>
-      <td><%= Setting.find_by(key: 'maybe_postgres_user')&.value %></td>
-      <td>
-        <%= link_to 'Edit', edit_setting_path(Setting.find_by(key: 'maybe_postgres_user')) %>
-      </td>
-    </tr>
-    <tr>
-      <td>Maybe PostgreSQL Password</td>
-      <td><%= Setting.find_by(key: 'maybe_postgres_password')&.value %></td>
-      <td>
-        <%= link_to 'Edit', edit_setting_path(Setting.find_by(key: 'maybe_postgres_password')) %>
+      <td class="text-left border">Accounts Retrieved</td>
+      <td class="text-right border">
+        <%= link_to accounts_path, class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
+          <%= Account.where(account_type: "maybe").count %>
+        <% end %>
       </td>
     </tr>
   </tbody>
 </table>
 
+<br>
+<button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" id="test_maybe_button">Retrieve Maybe Accounts</button>
+<img id="maybe_loading_spinner" style="display: none;" src="<%= asset_path('fe718d-transparent-spinner.gif') %>" alt="Loading..." class="spinner" />
+<br><div id="maybe_test_result"></div><br><br>
+
 <!-- Other Settings Table -->
-<h2>Scheduling Settings</h2>
-<table>
+<h2 class="text-2xl font-medium text-gray-700 mb-4">Scheduling Settings</h1>
+<table class="settings-table">
   <thead>
     <tr>
-      <th>Key</th>
-      <th>Value</th>
-      <th>Action</th>
+      <th class="text-left border">Setting</th>
+      <th class="text-right border">Value</th>
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td>Lookback Days</td>
-      <td><%= Setting.find_by(key: 'lookback_days')&.value %></td>
-      <td>
-        <%= link_to 'Edit', edit_setting_path(Setting.find_by(key: 'lookback_days')) %>
-      </td>
-    </tr>
-    <tr>
-      <td>Synchronization Schedule</td>
-      <td><%= Setting.find_by(key: 'synchronization_schedule')&.value %></td>
-      <td>
-        <%= link_to 'Edit', edit_setting_path(Setting.find_by(key: 'synchronization_schedule')) %>
-      </td>
-    </tr>
+    <% ["lookback_days", "synchronization_schedule"].each do |key| %>
+      <% setting = Setting.find_by(key: key) %>
+      <% if setting %>
+        <tr>
+          <td class="text-left border"><%= setting.display_name %></td>
+          <td class="text-right border"><%= setting.value %></td>
+          <td class="w-auto border-none">
+            <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" display-name="<%= setting.display_name %>" data-key="<%= setting.key %>" data-value="<%= setting.value %>">Edit</button>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
   </tbody>
 </table>
+
+<!-- Modal Structure -->
+<div id="modal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50 hidden">
+  <div class="modal-content bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+    <span id="closeModalBtn" class="close-btn absolute top-0 right-0 mt-4 mr-4 text-2xl text-gray-500 cursor-pointer hover:text-gray-700">&times;</span>
+    <h2 id="modalHeader" class="text-2xl font-semibold mb-4">Edit Setting</h2>
+    <form id="editForm" action="<%= settings_path %>" method="POST" class="space-y-4">
+      <input type="hidden" name="_method" value="PATCH"> <!-- This makes it act as PATCH -->
+      <input type="hidden" id="modal-key" name="setting[key]"> <!-- Store setting key -->
+      <input type="text" id="modal-value" name="setting[value]" placeholder="Enter new value"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+      
+      <button type="submit" id="save-btn" class="save-btn bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        Save
+      </button>
+    </form>
+  </div>
+</div>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const button = document.getElementById("test_simplefin_button");
-    const spinner = document.getElementById("loading-spinner");
-    const resultContainer = document.getElementById("simplefin_test_result");
 
-    button.addEventListener("click", function (event) {
-      event.preventDefault(); // Prevent default link behavior
-      spinner.style.display = "block";  // Show the spinner
+    const modal = document.getElementById("modal");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const openModalBtns = document.querySelectorAll(".openModalBtn");
+    const modalHeader = document.getElementById("modalHeader");
+    const modalValueInput = document.getElementById("modal-value");
+    const modalKeyInput = document.getElementById("modal-key");
 
-      // Make an AJAX request to trigger backend code
-      fetch("<%= test_simplefin_path %>", {
-        method: "GET",
-        headers: { "X-Requested-With": "XMLHttpRequest" }
-      })
-      .then(response => response.text())
-      .then(data => {
-        resultContainer.innerText = data;
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        resultContainer.innerText = "An error occurred.";
+    let currentSettingKey = "";  // Track which setting is being edited
+
+    // Open modal when Edit link is clicked
+    openModalBtns.forEach(btn => {
+      btn.addEventListener("click", function (event) {
+        event.preventDefault();
+        const settingKey = btn.getAttribute("data-key");
+        const settingValue = btn.getAttribute("data-value");
+        const displayName = btn.getAttribute("display-name");
+
+        // Pre-fill modal with current setting data
+        modalHeader.innerText = `Edit ${displayName}`;
+        modalKeyInput.value = settingKey;  // Set the hidden input with the setting key
+        currentSettingKey = settingKey;  // Save the setting key for later use
+        modalValueInput.value = settingValue;  // Set the input field with the current value
+
+        modal.style.display = "block";  // Show the modal
       });
     });
 
-    // MutationObserver: Hide spinner when text changes
-    const observer = new MutationObserver((mutationsList) => {
-      for (const mutation of mutationsList) {
-        if (mutation.type === "childList" || mutation.type === "characterData") {
-          spinner.style.display = "none";  // Hide the spinner
-        }
+    // Close modal when close button is clicked
+    closeModalBtn.onclick = function () {
+      modal.style.display = "none";
+    };
+
+    // Close modal if clicked outside the modal content
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
       }
+    };
+
+    // Handle the Save button click
+    document.getElementById("save-btn").addEventListener("click", function (event) {
+      event.preventDefault();  // Prevent form submission (well handle via AJAX)
+
+      const newValue = modalValueInput.value;  // Get the updated value from the input field
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
+      // Send the updated value to the server via AJAX
+      fetch(`/settings/${currentSettingKey}`, {
+        method: "PATCH",  // Use PATCH to update the existing setting
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+        body: JSON.stringify({
+          value: newValue,  // Send the new value to the server
+        }),
+      })
+        .then((response) => response.json()) // Expect a JSON response
+        .then((data) => {
+          if (data.success) {
+            modal.style.display = "none";  // Close the modal
+            window.location.reload()
+          } else {
+            alert("Error updating setting.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("An error occurred while updating the setting.");
+        });
     });
 
-    // Start observing `simplefin_test_result` for text changes
-    observer.observe(resultContainer, { childList: true, subtree: true, characterData: true });
+    function setupButton(buttonId, spinnerId, resultId, url) {
+      const button = document.getElementById(buttonId);
+      const spinner = document.getElementById(spinnerId);
+      const resultContainer = document.getElementById(resultId);
+
+      button.addEventListener("click", function (event) {
+        event.preventDefault(); // Prevent default link behavior
+        spinner.style.display = "block";  // Show the spinner
+
+        // Make an AJAX request
+        fetch(url, {
+          method: "GET",
+          headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(response => response.text())
+        .then(data => {
+          resultContainer.innerText = data;
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          resultContainer.innerText = "An error occurred.";
+        })
+        .finally(() => {
+          spinner.style.display = "none";  // Hide the spinner when the request completes
+        });
+      });
+    }
+
+    // Initialize for both SimpleFIN and Maybe buttons
+    setupButton("test_simplefin_button", "simplefin_loading_spinner", "simplefin_test_result", "<%= test_simplefin_path %>");
+    setupButton("test_maybe_button", "maybe_loading_spinner", "maybe_test_result", "<%= test_maybe_path %>");
   });
 </script>

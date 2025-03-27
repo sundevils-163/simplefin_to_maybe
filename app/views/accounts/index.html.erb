@@ -1,0 +1,33 @@
+<% [{display: "SimpleFIN Accounts", account_type: "simplefin"}, {display: "Maybe Accounts", account_type: "maybe"}].each do |this_type| %>
+  <br>
+  <h2 class="text-2xl font-medium text-gray-700 mb-4"><%= this_type[:display] %></h2>
+  <table class="accounts-table bg-white rounded-lg overflow-hidden">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="text-left py-2 px-4 border-b">Name</th>
+        <th class="text-left py-2 px-4 border-b">Identifier</th>
+        <% if this_type[:account_type] == "maybe" %>
+          <th class="text-left py-2 px-4 border-b">Account Type</th>
+        <% end %>
+        <th class="text-left py-2 px-4 border-b">Updated At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% Account.where(account_type: this_type[:account_type]).each do |account| %>
+        <tr class="hover:bg-gray-100">
+          <td class="py-2 px-4 border-b"><%= account.display_name %></td>
+          <td class="py-2 px-4 border-b"><%= account.identifier %></td>
+          <% if this_type[:account_type] == "maybe" %>
+            <td class="text-left py-2 px-4 border-b"><%= account.accountable_type %></td>
+          <% end %>
+          <td class="py-2 px-4 border-b"><%= account.updated_at %></td>
+          <td class="py-2 px-4 text-center">
+            <%= link_to account_path(account), method: :delete, remote: true, class: "text-blue-500 hover:text-blue-700" do %>
+              <i class="fas fa-trash-alt"></i> <!-- Trashcan icon -->
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
