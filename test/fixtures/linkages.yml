@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  id: 
+  simplefin_id: MyString
+  simplefin_id_sanitized: 
+  maybe_account_id: 
+  last_sync: 2025-03-26 22:17:53
+
+two:
+  id: 
+  simplefin_id: MyString
+  simplefin_id_sanitized: 
+  maybe_account_id: 
+  last_sync: 2025-03-26 22:17:53

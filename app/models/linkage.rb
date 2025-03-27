@@ -1,0 +1,2 @@
+class Linkage < ApplicationRecord
+end
