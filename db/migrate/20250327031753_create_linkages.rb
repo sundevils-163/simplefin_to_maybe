@@ -5,6 +5,7 @@ class CreateLinkages < ActiveRecord::Migration[7.1]
       t.uuid :simplefin_id_sanitized
       t.uuid :maybe_account_id
       t.datetime :last_sync
+      t.string :last_balance_epoch
       t.timestamps
     end
   end

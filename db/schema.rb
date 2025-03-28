@@ -28,6 +28,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_27_165528) do
     t.uuid "simplefin_id_sanitized"
     t.uuid "maybe_account_id"
     t.datetime "last_sync"
+    t.string "last_balance_epoch"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
