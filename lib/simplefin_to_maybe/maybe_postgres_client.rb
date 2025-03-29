@@ -145,7 +145,7 @@ module SimpleFINToMaybe
       # Check if a row exists with the same account_id and date
       select_query = <<-SQL
         SELECT id FROM public.account_entries 
-        WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) LIMIT 1;
+        WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) AND entryable_type = 'Account::Valuation' LIMIT 1;
       SQL
       existing_entry = execute(select_query, [account_id, date]).first
     
