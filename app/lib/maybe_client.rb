@@ -44,6 +44,7 @@ class MaybeClient
         a.id,
         a.name,
         a.family_id,
+        a.currency,
         a.accountable_type,
         a.subtype,
         a.plaid_account_id,
@@ -58,71 +59,25 @@ class MaybeClient
     execute(query, [family_id])
   end
   
-  def get_simplefin_transactions(account_id, start_date = get_lookback_date())
+  def get_simplefin_transactions(account_id, start_date)
     query = <<-SQL
       SELECT plaid_id FROM public.account_entries
       WHERE account_id = $1
       AND plaid_id IS NOT NULL
-      AND date >= $2;
+      AND date >= (TO_TIMESTAMP($2)::DATE)
     SQL
   
     execute(query, [account_id, start_date])
   end
 
-  def new_simplefin_account(account_row, simplefin_account)
-    # extract maybe information
-    family_id = account_row.dig("family_id")
-    account_id = account_row.dig("id")
-    account_name = account_row.dig("name")
-    account_type = account_row.dig("accountable_type")
-    account_subtype = account_row.dig("subtype")
-
-    # extra simplefin information
-    simplefin_account_uuid = simplefin_account.dig("id")
-    simplefin_org_uri = simplefin_account.dig("org", "url")
-    simplefin_org_id = simplefin_account.dig("org", "id")
-    currency = simplefin_account.dig("currency")
-    current_balance = simplefin_account.dig("balance")
-    available_balance = simplefin_account.dig("available-balance")
-    last_synced_at = convert_epoch_to_pg_timestamp(simplefin_account.dig("balance-date"))
-
-    # misc
-    stuffed_products = '{"assets","balance","investments","liabilities","transactions"}'
-  
-    # Insert the plaid_items entry
-    plaid_items_uuid = SecureRandom.uuid
-    query = <<-SQL
-      INSERT INTO public.plaid_items(id, family_id, plaid_id, name, created_at, updated_at, access_token, institution_url, institution_id, available_products, billed_products, last_synced_at) 
-      VALUES ($1, $2, $3, $4, NOW(), NOW(), 'SimpleFIN', $5, $6, $7, $8, $9);
-    SQL
-    execute(query, [plaid_items_uuid, family_id, simplefin_account_uuid, account_name, simplefin_org_uri, simplefin_org_id, stuffed_products, stuffed_products, last_synced_at])
-  
-    # Insert the plaid_accounts entry
-    plaid_account_uuid = SecureRandom.uuid
-    query = <<-SQL
-      INSERT INTO public.plaid_accounts(id, plaid_id, plaid_item_id, plaid_type, plaid_subtype, name, created_at, updated_at, current_balance, available_balance, currency) 
-      VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW(), $7, $8, $9);
-    SQL
-    execute(query, [plaid_account_uuid, simplefin_account_uuid, plaid_items_uuid, account_type, account_subtype, account_name, current_balance, available_balance, currency])
-  
-    # Update the accounts entry to point to the plaid_accounts.id
-    query = <<-SQL
-      UPDATE public.accounts 
-      SET plaid_account_id = $1 
-      WHERE id = $2;
-    SQL
-    execute(query, [plaid_account_uuid, account_id])
-
-    return account_id
-  end
-
   def new_simplefin_import(account_row, simplefin_account_id)
-    family_id = account_row.dig("family_id")
-    account_id = account_row.dig("id")
+    family_id = account_row.maybe_family_id
+    account_id = account_row.identifier
 
     query = <<-SQL
       INSERT INTO public.imports(id, family_id, account_id, created_at, updated_at, type, status) 
-      VALUES ($1, $2, $3, NOW(), NOW(), 'MintImport', 'importing');
+      VALUES ($1, $2, $3, NOW(), NOW(), 'MintImport', 'importing')
+      RETURNING id;
     SQL
     execute(query, [simplefin_account_id, family_id, account_id])
 
@@ -132,8 +87,7 @@ class MaybeClient
       WHERE id = $2;
     SQL
     execute(query, [simplefin_account_id, account_id])
-
-    return account_id
+    return
   end
 
   def upsert_account_valuation(account_id, simplefin_account)
@@ -145,14 +99,14 @@ class MaybeClient
     # Check if a row exists with the same account_id and date
     select_query = <<-SQL
       SELECT id FROM public.account_entries 
-      WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) LIMIT 1;
+      WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) AND entryable_type = 'Account::Valuation' LIMIT 1;
     SQL
     existing_entry = execute(select_query, [account_id, date]).first
   
     if existing_entry
       # Update existing row
         
-      puts "Updating Balance..."
+      Rails.logger.info "Found existing valuation"
 
       valuation_uuid = existing_entry["id"]
       update_query = <<-SQL
@@ -171,8 +125,8 @@ class MaybeClient
       execute(valuation_update_query, [valuation_uuid])
     else
       # Insert new row
-      
-      puts "Adding a Balance Update..."
+
+      Rails.logger.info "Adding a Balance Update..."
 
       insert_query = <<-SQL
         INSERT INTO public.account_entries (
@@ -195,19 +149,24 @@ class MaybeClient
   end
   
   # client.new_transaction('5a6c6582-6ff0-48b9-9106-1e5cc02c094e', '11.1100', 'USD', '2025-03-11', 'transaction6', 'TRN-abc123')
-  def new_transaction(account_id, amount, short_date, display_name, simplefin_txn_id, currency = "USD")
+  def new_transaction(account_id, simplefin_transaction_record, import_id, currency)
+    amount = simplefin_transaction_record.dig("amount")
+    short_date = simplefin_transaction_record.dig("posted")
+    display_name = simplefin_transaction_record.dig("description")
+    simplefin_txn_id = simplefin_transaction_record.dig("id")
+
     transaction_uuid = SecureRandom.uuid
     adjusted_amount = BigDecimal(amount.to_s) * -1
   
     # Insert the account_entries entry
     query = <<-SQL
       INSERT INTO public.account_entries(
-        account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at, plaid_id
+        account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at, plaid_id, import_id
       ) VALUES (
-        $1, 'Account::Transaction', $2, $3, $4, $5, $6, NOW(), NOW(), $7
+        $1, 'Account::Transaction', $2, $3, $4, (TO_TIMESTAMP($5)::DATE), $6, NOW(), NOW(), $7, $8
       );
     SQL
-    execute(query, [account_id, transaction_uuid, adjusted_amount, currency, short_date, display_name, simplefin_txn_id])
+    execute(query, [account_id, transaction_uuid, adjusted_amount, currency, short_date, display_name, simplefin_txn_id, import_id])
   
     # Insert the account_transaction entry
     query = <<-SQL
@@ -227,11 +186,13 @@ class MaybeClient
   private
 
   def execute(query, params = [])
+    Rails.logger.info "Executing Query: #{query}"
+    Rails.logger.info "With Parameters: #{params.inspect}"
     begin
       result = @connection.exec_params(query, params)
       result.to_a
     rescue PG::Error => e
-      puts "Query execution error: #{e.message}"
+      Rails.logger.error "Query execution error: #{e.message}"
       nil
     end
   end

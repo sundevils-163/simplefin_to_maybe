@@ -25,21 +25,16 @@
 }
 @keyframes blink {
   0% { opacity: 1; }
-  100% {opacity: 0.5; }
+  100% {opacity: 0.4; }
 }
 
-.settings-table {
-  width: 700px;
-  border-collapse: collapse;
-  table-layout: fixed;
+.sync-status {
+  height: 38px; /* Adjust height to fit your design */
+  width: auto;  /* Adjust width to fit your design */
+  object-fit: contain; /* Ensures image fits without distortion */
+  vertical-align: middle; /* Aligns with table row content */
 }
-.settings-table th {
-  background-color: #f4f4f4;
-  padding: 7px;
-}
-.settings-table td {
-  padding: 4px;
-}
+
 
 /* Modal styling */
 .modal {

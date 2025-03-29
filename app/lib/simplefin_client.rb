@@ -12,9 +12,18 @@ class SimplefinClient
     @password = password
   end
 
-  # Method to fetch all accounts
+  # Method to fetch all accounts, balances only
   def get_accounts
     query_params = { "balances-only" => 1 }
+    invoke_request("/accounts", query_params)
+  end
+
+  # Method to fetch single account, balances only
+  def get_account(account_id)
+    query_params = {
+      "balances-only" => 1,
+      "account" => URI.encode_www_form_component(account_id)
+    }
     invoke_request("/accounts", query_params)
   end
 
@@ -33,6 +42,8 @@ class SimplefinClient
   def invoke_request(endpoint, query_params = {})
     uri = URI.parse("#{BASE_URL}#{endpoint}")
     uri.query = URI.encode_www_form(query_params) unless query_params.empty?
+
+    Rails.logger.info "Invoking HTTP GET on '#{uri}'"
 
     # Perform HTTP request with basic authentication
     request = Net::HTTP::Get.new(uri)

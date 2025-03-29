@@ -1,40 +1,49 @@
-<!-- Simplefin Settings Table -->
 <br>
-<h2 class="text-2xl font-medium text-gray-700 mb-4">SimpleFIN Settings</h1>
-<table class="settings-table">
+<h2 class="text-2xl font-semibold mb-4">SimpleFIN Settings</h2>
+<table class="bg-white shadow-md rounded-lg overflow-hidden">
   <thead>
-    <tr>
-      <th class="text-left border">Setting</th>
-      <th class="text-right border">Value</th>
+    <tr class="bg-gray-200">
+      <th class="py-2 px-4 border-b text-left">Setting</th>
+      <th class="py-2 px-4 border-b text-center"></th>
+      <th class="py-2 px-4 border-b text-right">Value</th>
+      <th class="py-2 px-4 border-b text-center"></th>
     </tr>
   </thead>
   <tbody>
     <% ["simplefin_username", "simplefin_password"].each do |key| %>
       <% setting = Setting.find_by(key: key) %>
       <% if setting %>
-        <tr>
-          <td class="text-left border"><%= setting.display_name %></td>
-          <td class="text-right border">
+        <tr class="hover:bg-gray-100">
+          <td class="py-2 px-4 border-b text-left"><%= setting.display_name %></td>
+          <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrows-left-right text-gray-500" /></td>
+          <td class="py-2 px-4 border-b text-right">
             <% if setting.value.present? %>
               *********
             <% else %>
               <span class="blinking-undefined">undefined</span>
             <% end %>
           </td>
-          <td class="w-auto border-none">
-            <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" display-name="<%= setting.display_name %>" data-key="<%= setting.key %>" data-value="<%= setting.value %>" ecrypted="<%= setting.encrypted %>">Edit</button>
+          <td class="py-2 px-4 border-b text-center">
+            <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" 
+              display-name="<%= setting.display_name %>"
+              data-key="<%= setting.key %>"
+              data-value="<%= setting.value %>"
+              ecrypted="<%= setting.encrypted %>">
+              Edit
+            </button>
           </td>
         </tr>
       <% end %>
     <% end %>
-    <tr>
-      <td class="text-left border">Accounts Retrieved</td>
-      <td class="text-right border">
-        <%= link_to accounts_path, class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
+    <tr class="hover:bg-gray-100">
+      <td class="py-2 px-4 border-b text-left">Accounts Retrieved</td>
+      <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrow-right text-gray-500" /></td>
+      <td class="py-2 px-4 border-b text-right">
+        <%= link_to accounts_path, id: "simplefin-count-display", class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
           <%= Account.where(account_type: "simplefin").count %>
         <% end %>
       </td>
-      <td class="w-auto border-none"><button class="text-white px-4 py-2 rounded">Edit</button></td>
+      <td class="py-2 px-4 border-b text-center"><button class="text-white px-4 py-2 rounded">|</button></td>
     </tr>
   </tbody>
 </table>
@@ -45,12 +54,14 @@
 <br><div id="simplefin_test_result"></div><br><br>
 
 <!-- Database Settings Table -->
-<h2 class="text-2xl font-medium text-gray-700 mb-4">Maybe Settings</h1>
-<table class="settings-table">
+<h2 class="text-2xl font-semibold mb-4">Maybe Settings</h1>
+<table class="bg-white shadow-md rounded-lg overflow-hidden">
   <thead>
-    <tr>
-      <th class="text-left border">Setting</th>
-      <th class="text-right border">Value</th>
+    <tr class="bg-gray-200">
+      <th class="py-2 px-4 border-b text-left">Setting</th>
+      <th class="py-2 px-4 border-b text-center"></th>
+      <th class="py-2 px-4 border-b text-right">Value</th>
+      <th class="py-2 px-4 border-b text-center"></th>
     </tr>
   </thead>
   <tbody>
@@ -64,12 +75,13 @@
       <% setting = Setting.find_by(key: key.to_s) %>
       <% value = setting&.value.presence || default %>
       <% is_default = setting&.value.blank? %>
-      <tr>
-        <td class="text-left border"><%= setting&.display_name || key.to_s.humanize %></td>
-        <td class="text-right border <%= "text-gray-400" if is_default %>">
+      <tr class="hover:bg-gray-100">
+        <td class="py-2 px-4 border-b text-left"><%= setting&.display_name || key.to_s.humanize %></td>
+        <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrows-left-right text-gray-500" /></td>
+        <td class="py-2 px-4 border-b text-right <%= "text-gray-400" if is_default %>">
           <%= value %>
         </td>
-        <td class="w-auto border-none">
+        <td class="py-2 px-4 border-b text-center">
           <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" 
             display-name="<%= setting&.display_name || key.to_s.humanize %>" 
             data-key="<%= key %>" 
@@ -82,28 +94,35 @@
   <% end %>
     <% setting = Setting.find_by(key: "maybe_postgres_password") %>
     <% if setting %>
-      <tr>
-        <td class="text-left border"><%= setting.display_name %></td>
-        <td class="text-right border">
+      <tr class="hover:bg-gray-100">
+        <td class="py-2 px-4 border-b text-left"><%= setting.display_name %></td>
+        <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrows-left-right text-gray-500" /></td>
+        <td class="py-2 px-4 border-b text-right">
           <% if setting.value.present? %>
             *********
           <% else %>
             <span class="blinking-undefined">undefined</span>
           <% end %>
         </td>
-        <td class="w-auto border-none">
-          <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" display-name="<%= setting.display_name %>" data-key="<%= setting.key %>" data-value="<%= setting.value %>">Edit</button>
+        <td class="py-2 px-4 border-b text-center">
+          <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            display-name="<%= setting.display_name %>"
+            data-key="<%= setting.key %>"
+            data-value="<%= setting.value %>">
+            Edit
+          </button>
         </td>
       </tr>
     <% end %>
-    <tr>
-      <td class="text-left border">Accounts Retrieved</td>
-      <td class="text-right border">
-        <%= link_to accounts_path, class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
+    <tr class="hover:bg-gray-100">
+      <td class="py-2 px-4 border-b text-left">Accounts Retrieved</td>
+      <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrow-right text-gray-500" /></td>
+      <td class="py-2 px-4 border-b text-right">
+        <%= link_to accounts_path, id: "maybe-count-display", class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
           <%= Account.where(account_type: "maybe").count %>
         <% end %>
       </td>
-      <td class="w-auto border-none"><button class="text-white px-4 py-2 rounded">Edit</button></td>
+      <td class="py-2 px-4 border-b text-center"><button class="text-white px-4 py-2 rounded">|</button></td>
     </tr>
   </tbody>
 </table>
@@ -114,27 +133,30 @@
 <br><div id="maybe_test_result"></div><br><br>
 
 <!-- Other Settings Table -->
-<h2 class="text-2xl font-medium text-gray-700 mb-4">Scheduling Settings</h1>
-<table class="settings-table">
+<h2 class="text-2xl font-semibold mb-4">Scheduling Settings</h1>
+<table class="bg-white shadow-md rounded-lg overflow-hidden">
   <thead>
-    <tr>
-      <th class="text-left border">Setting</th>
-      <th class="text-right border">Value</th>
+    <tr class="bg-gray-200">
+      <th class="py-2 px-4 border-b text-left">Setting</th>
+      <th class="py-2 px-4 border-b text-center"></th>
+      <th class="py-2 px-4 border-b text-right">Value</th>
+      <th class="py-2 px-4 border-b text-center"></th>
     </tr>
   </thead>
   <tbody>
-    <% settings = [{ lookback_days: "30" },{ synchronization_schedule: "0 5,23 * * *" }] %>
+    <% settings = [{ lookback_days: "7" },{ synchronization_schedule: "0 5,23 * * *" }] %>
     <% settings.each do |hash| %>
       <% hash.each do |key, default| %>
         <% setting = Setting.find_by(key: key.to_s) %>
         <% value = setting&.value.presence || default %>
         <% is_default = setting&.value.blank? %>
-        <tr>
-          <td class="text-left border"><%= setting&.display_name || key.to_s.humanize %></td>
-          <td class="text-right border <%= "text-gray-400" if is_default %>">
+        <tr class="hover:bg-gray-100">
+          <td class="py-2 px-4 border-b text-left"><%= setting&.display_name || key.to_s.humanize %></td>
+          <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrows-left-right text-gray-500" /></td>
+          <td class="py-2 px-4 border-b text-right <%= "text-gray-400" if is_default %>">
             <%= value %>
           </td>
-          <td class="w-auto border-none">
+          <td class="py-2 px-4 border-b text-center">
             <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" 
               display-name="<%= setting&.display_name || key.to_s.humanize %>" 
               data-key="<%= key %>" 
@@ -191,6 +213,9 @@
         modalValueInput.value = settingValue;  // Set the input field with the current value
 
         modal.style.display = "block";  // Show the modal
+        setTimeout(() => {
+          modalValueInput.focus()
+        }, 50)
       });
     });
 
@@ -218,6 +243,7 @@
         method: "PATCH",  // Use PATCH to update the existing setting
         headers: {
           "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
           "X-CSRF-Token": csrfToken,
         },
         body: JSON.stringify({
@@ -239,10 +265,12 @@
         });
     });
 
-    function setupButton(buttonId, spinnerId, resultId, url) {
+    function setupButton(buttonId, spinnerId, resultId, url, countId) {
       const button = document.getElementById(buttonId);
       const spinner = document.getElementById(spinnerId);
       const resultContainer = document.getElementById(resultId);
+      const countContainer = document.getElementById(countId);
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 
       button.addEventListener("click", function (event) {
         event.preventDefault(); // Prevent default link behavior
@@ -251,11 +279,15 @@
         // Make an AJAX request
         fetch(url, {
           method: "GET",
-          headers: { "X-Requested-With": "XMLHttpRequest" }
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRF-Token": csrfToken,
+          }
         })
-        .then(response => response.text())
+        .then(response => response.json())
         .then(data => {
-          resultContainer.innerText = data;
+          resultContainer.innerText = data.output;
+          countContainer.innerText = data.account_count;
         })
         .catch(error => {
           console.error("Error:", error);
@@ -268,7 +300,7 @@
     }
 
     // Initialize for both SimpleFIN and Maybe buttons
-    setupButton("test_simplefin_button", "simplefin_loading_spinner", "simplefin_test_result", "<%= test_simplefin_path %>");
-    setupButton("test_maybe_button", "maybe_loading_spinner", "maybe_test_result", "<%= test_maybe_path %>");
+    setupButton("test_simplefin_button", "simplefin_loading_spinner", "simplefin_test_result", "<%= test_simplefin_path %>", "simplefin-count-display");
+    setupButton("test_maybe_button", "maybe_loading_spinner", "maybe_test_result", "<%= test_maybe_path %>", "maybe-count-display");
   });
 </script>

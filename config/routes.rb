@@ -1,8 +1,14 @@
 Rails.application.routes.draw do
 
-  resources :linkages, only: [:index, :create, :destroy, :update] do
-    post "sync", on: :member
+  resources :linkages, only: [:index, :create, :destroy] do
+    member do
+      post :sync
+    end
+    collection do
+      post :run_all_syncs
+    end
   end
+  get '/linkages/:id/sync_status', to: 'linkages#sync_status'
 
   resources :accounts, only: [:index, :destroy]
 

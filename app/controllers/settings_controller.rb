@@ -1,8 +1,6 @@
 # app/controllers/settings_controller.rb
 require 'net/http'
 require 'uri'
-require Rails.root.join("app/lib/simplefin_client.rb")
-require Rails.root.join("app/lib/maybe_client.rb")
 
 class SettingsController < ApplicationController
   before_action :set_setting, only: [:update]
@@ -22,7 +20,7 @@ class SettingsController < ApplicationController
   end
 
   def test_simplefin
-    Rails.logger.info "Begin test_simplefin"
+
     username = Setting.find_by(key: 'simplefin_username')&.value
     password = Setting.find_by(key: 'simplefin_password')&.value
 
@@ -40,8 +38,10 @@ class SettingsController < ApplicationController
         response[:response].dig("errors")&.each do |warning|
           output << "  Warning: #{warning}"
         end
-        render plain: output.join("\n")
-        cache_accounts(response[:response].dig("accounts"), "simplefin")
+        found_simplefin_accounts = response[:response].dig("accounts") || []
+        cache_accounts(found_simplefin_accounts, "simplefin")
+        remove_nonexistant_accounts(found_simplefin_accounts, "simplefin")
+        render json: { output: output.join("\n"), account_count: found_simplefin_accounts.length }
       else
         output = ["\nError during retrieval: [#{response[:status_code]}]"]
         response[:response].dig("errors")&.each do |warning|
@@ -49,48 +49,60 @@ class SettingsController < ApplicationController
         end
         output = output.join(" ")
         Rails.logger.error output
-        render plain: output
+        render json: { output: output, account_count: 0 }
       end
     end
   end
 
   def test_maybe
-    Rails.logger.info "Begin test_maybe"
-    host = Setting.find_by(key: 'maybe_postgres_host')&.value || "127.0.0.1"
-    port = Setting.find_by(key: 'maybe_postgres_port')&.value || "5432"
-    dbname = Setting.find_by(key: 'maybe_postgres_db')&.value || "maybe"
-    user = Setting.find_by(key: 'maybe_postgres_user')&.value || "maybe"
-    password = Setting.find_by(key: 'maybe_postgres_password')&.value || "maybe"
+    maybe_client = MaybeClientService.connect
 
-    maybe_client = MaybeClient.new(host, port, dbname, user, password)
-    if maybe_client.connected?
-      render plain: "\nSuccess!"
-      accounts = maybe_client.get_accounts()
-      cache_accounts(accounts, "maybe")
+    if maybe_client
+      output = ["\nSuccess!"]
+      found_maybe_accounts = maybe_client.get_accounts() || []
+      cache_accounts(found_maybe_accounts, "maybe")
+      remove_nonexistant_accounts(found_maybe_accounts, "maybe")
+      render json: { output: output.join("\n"), account_count: found_maybe_accounts.length }
     else
-      render plain: maybe_client.error_message
+      render json: { output: maybe_client.error_message, account_count: 0 }
     end
   end
 
   private
 
   def cache_accounts(accounts, account_type)
+
+    allowed_maybe_types = ["Depository", "CreditCard", "Loan", "Investment"]
+
     accounts.each do |account_data|
       if account_type == "simplefin"
         identifier = account_data.dig("id")
         display_name = "#{account_data.dig("org", "name")} - #{account_data.dig("name")}"
+        accountable_type = nil
+        family_id = nil
+        currency = account_data.dig("currency")
       elsif account_type == "maybe"
+        accountable_type = account_data.dig("accountable_type")
+        next unless allowed_maybe_types.include?(accountable_type.to_s)
         identifier = account_data.dig("id")
         display_name = account_data.dig("name")
-        accountable_type = account_data.dig("accountable_type")
+        family_id = account_data.dig("family_id")
+        currency = account_data.dig("currency")
       else
-        break
+        raise ArgumentError, "Invalid account_type: #{account_type}"
       end
       Account.find_or_create_by(account_type: account_type, identifier: identifier) do |account|
         account.display_name = display_name
-        account.accountable_type = accountable_type
+        account.accountable_type = accountable_type if accountable_type
+        account.maybe_family_id = family_id if family_id
+        account.currency = currency if currency
       end
     end
+  end
+
+  def remove_nonexistant_accounts(accounts, account_type)
+    account_ids = accounts.map { |account| account.dig("id") }
+    Account.where(account_type: account_type).where.not(identifier: account_ids).destroy_all
   end
 
   def set_setting

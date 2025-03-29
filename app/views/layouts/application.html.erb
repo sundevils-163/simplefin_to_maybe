@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="icon" href="<%= asset_path('sync.png') %>" type="image/x-icon">
     <title>SimpleFIN to Maybe</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
@@ -12,24 +13,42 @@
 
   <body class="pb-16">
     <nav class="bg-gray-900 text-white p-4 fixed w-full top-0 z-50 shadow-lg">
-      <div class="container flex space-x-6">
-        <%= link_to root_path, class: "flex items-center space-x-2 hover:text-gray-300" do %>
-          <i class="fas fa-home"></i>
-          <span>Home</span>
-        <% end %>
+      <div class="container flex items-center justify-between">
 
-        <%= link_to accounts_path, class: "flex items-center space-x-2 hover:text-gray-300" do %>
-          <i class="fas fa-file-invoice-dollar"></i>
-          <span>Accounts</span>
-        <% end %>
+        <!-- Left: Icons -->
+        <div class="flex space-x-4 ml-2">
+          <%= link_to "https://beta-bridge.simplefin.org/", target: "_blank", rel: "noopener noreferrer" do %>
+            <%= image_tag("simplefin_logo.svg", class: "w-5 h-5") %>
+          <% end %>
+          <i class="fas fa-arrow-right text-lg text-white"></i>
+          <%= link_to "https://maybefinance.com", target: "_blank", rel: "noopener noreferrer" do %>
+            <%= image_tag("maybe.png", class: "w-5 h-5") %>
+          <% end %>
+        </div>
 
-        <%= link_to settings_path, class: "flex items-center space-x-2 hover:text-gray-300" do %>
-          <i class="fas fa-cog"></i>
-          <span>Configuration</span>
-        <% end %>
+        <!-- Vertical Separator -->
+        <div class="border-l-4 border-gray-500 h-6 mx-4 mr-auto ml-7"></div>
+
+        <!-- Center: Navigation -->
+        <div class="flex space-x-6 mr-265">
+          <%= link_to root_path, class: "flex items-center space-x-2 hover:text-gray-300" do %>
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+          <% end %>
+
+          <%= link_to accounts_path, class: "flex items-center space-x-2 hover:text-gray-300" do %>
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Accounts</span>
+          <% end %>
+
+          <%= link_to settings_path, class: "flex items-center space-x-2 hover:text-gray-300" do %>
+            <i class="fas fa-cog"></i>
+            <span>Configuration</span>
+          <% end %>
+        </div>
       </div>
     </nav>
-    <div class="pt-20 pl-8">
+    <div class="pt-14 pb-20 pl-10 pr-10">
       <%= yield %>
     </div>
   </body>
