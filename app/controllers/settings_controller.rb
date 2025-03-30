@@ -60,10 +60,12 @@ class SettingsController < ApplicationController
     if maybe_client
       output = ["\nSuccess!"]
       found_maybe_accounts = maybe_client.get_accounts() || []
+      maybe_client.close
       cache_accounts(found_maybe_accounts, "maybe")
       remove_nonexistant_accounts(found_maybe_accounts, "maybe")
       render json: { output: output.join("\n"), account_count: found_maybe_accounts.length }
     else
+      maybe_client.close
       render json: { output: maybe_client.error_message, account_count: 0 }
     end
   end

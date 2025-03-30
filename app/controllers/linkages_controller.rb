@@ -19,16 +19,16 @@ class LinkagesController < ApplicationController
     # Create new linkage
     @linkage = Linkage.new(linkage_params)
     if @linkage.save
-      Rails.logger.info "YES SAVE"
-      if create_linkage_in_maybe_database()
-        redirect_to linkages_path, notice: 'Linkage created successfully.'
-      else
-        Rails.logger.error 'Failed to create linkage1'
-        render :index, alert: 'Failed to create linkage1'
-      end
+      #Rails.logger.info "YES SAVE"
+      #if create_linkage_in_maybe_database()
+      redirect_to linkages_path, notice: 'Linkage created successfully.'
+      #else
+      #  Rails.logger.error 'Failed to create linkage1'
+      #  render :index, alert: 'Failed to create linkage1'
+      #end
     else
-      Rails.logger.error 'Failed to create linkage2'
-      render :index, alert: 'Failed to create linkage2'
+      Rails.logger.error 'Failed to create linkage'
+      render :index, alert: 'Failed to create linkage'
     end
   end
 
@@ -60,23 +60,23 @@ class LinkagesController < ApplicationController
 
   private
 
-  def create_linkage_in_maybe_database()
-
-    maybe_client = MaybeClientService.connect
-
-    if maybe_client
-      @maybe_account = Account.find_by(id: @linkage.maybe_account_id)
-      if @maybe_account
-        maybe_client.new_simplefin_import(@maybe_account, @linkage.simplefin_id_sanitized)
-        return true
-      else
-        Rails.logger.error "Maybe account not found for ID: #{@linkage.maybe_account_id}"
-      end
-    else
-      Rails.logger.error "Could not connect to Maybe database"
-    end
-    return false
-  end
+  #def create_linkage_in_maybe_database()
+  #
+  #  maybe_client = MaybeClientService.connect
+  #
+  #  if maybe_client
+  #    @maybe_account = Account.find_by(id: @linkage.maybe_account_id)
+  #    if @maybe_account
+  #      #maybe_client.new_simplefin_import(@maybe_account, @linkage.simplefin_id_sanitized)  #dont think this is needed at all.. we store the in our postgres now
+  #      return true
+  #    else
+  #      Rails.logger.error "Maybe account not found for ID: #{@linkage.maybe_account_id}"
+  #    end
+  #  else
+  #    Rails.logger.error "Could not connect to Maybe database"
+  #  end
+  #  return false
+  #end
 
   def set_linkage
     @linkage = Linkage.find(params[:id])

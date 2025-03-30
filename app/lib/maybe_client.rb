@@ -48,11 +48,7 @@ class MaybeClient
         a.accountable_type,
         a.subtype,
         a.plaid_account_id,
-        a.import_id,
-        pa.plaid_id AS simplefin_account_id
       FROM public.accounts AS a
-      LEFT OUTER JOIN public.plaid_accounts AS pa
-        ON a.plaid_account_id = pa.id
       WHERE a.family_id = $1;
     SQL
   
@@ -70,25 +66,25 @@ class MaybeClient
     execute(query, [account_id, start_date])
   end
 
-  def new_simplefin_import(account_row, simplefin_account_id)
-    family_id = account_row.maybe_family_id
-    account_id = account_row.identifier
-
-    query = <<-SQL
-      INSERT INTO public.imports(id, family_id, account_id, created_at, updated_at, type, status) 
-      VALUES ($1, $2, $3, NOW(), NOW(), 'MintImport', 'importing')
-      RETURNING id;
-    SQL
-    execute(query, [simplefin_account_id, family_id, account_id])
-
-    query = <<-SQL
-      UPDATE public.accounts 
-      SET import_id = $1 
-      WHERE id = $2;
-    SQL
-    execute(query, [simplefin_account_id, account_id])
-    return
-  end
+  #def new_simplefin_import(account_row, simplefin_account_id)
+  #  family_id = account_row.maybe_family_id
+  #  account_id = account_row.identifier
+  #
+  #  query = <<-SQL
+  #    INSERT INTO public.imports(id, family_id, account_id, created_at, updated_at, type, status) 
+  #    VALUES ($1, $2, $3, NOW(), NOW(), 'MintImport', 'importing')
+  #    RETURNING id;
+  #  SQL
+  #  execute(query, [simplefin_account_id, family_id, account_id])
+  #
+  #  query = <<-SQL
+  #    UPDATE public.accounts 
+  #    SET import_id = $1 
+  #    WHERE id = $2;
+  #  SQL
+  #  execute(query, [simplefin_account_id, account_id])
+  #  return
+  #end
 
   def upsert_account_valuation(account_id, simplefin_account)
     valuation_uuid = SecureRandom.uuid
@@ -148,8 +144,7 @@ class MaybeClient
     end
   end
   
-  # client.new_transaction('5a6c6582-6ff0-48b9-9106-1e5cc02c094e', '11.1100', 'USD', '2025-03-11', 'transaction6', 'TRN-abc123')
-  def new_transaction(account_id, simplefin_transaction_record, import_id, currency)
+  def new_transaction(account_id, simplefin_transaction_record, currency)
     amount = simplefin_transaction_record.dig("amount")
     short_date = simplefin_transaction_record.dig("posted")
     display_name = simplefin_transaction_record.dig("description")
@@ -161,12 +156,12 @@ class MaybeClient
     # Insert the account_entries entry
     query = <<-SQL
       INSERT INTO public.account_entries(
-        account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at, plaid_id, import_id
+        account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at, plaid_id
       ) VALUES (
         $1, 'Account::Transaction', $2, $3, $4, (TO_TIMESTAMP($5)::DATE), $6, NOW(), NOW(), $7, $8
       );
     SQL
-    execute(query, [account_id, transaction_uuid, adjusted_amount, currency, short_date, display_name, simplefin_txn_id, import_id])
+    execute(query, [account_id, transaction_uuid, adjusted_amount, currency, short_date, display_name, simplefin_txn_id])
   
     # Insert the account_transaction entry
     query = <<-SQL

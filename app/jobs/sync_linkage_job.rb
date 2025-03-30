@@ -13,6 +13,7 @@ class SyncLinkageJob < ApplicationJob
     maybe_client = MaybeClientService.connect
     if maybe_client.nil?
       linkage.update(sync_status: :error, last_sync: Time.current)
+      maybe_client.close
       return
     end
 
@@ -22,6 +23,7 @@ class SyncLinkageJob < ApplicationJob
     if username.blank? || password.blank?
       Rails.logger.warn "Missing SimpleFIN username or password!"
       linkage.update(sync_status: :error, last_sync: Time.current)
+      maybe_client.close
       return
     else
       simplefin_client = SimplefinClient.new(username, password)
@@ -63,6 +65,7 @@ class SyncLinkageJob < ApplicationJob
     end
    
     linkage.update(sync_status: :complete, last_sync: Time.current)
+    maybe_client.close
   end
 end
   
