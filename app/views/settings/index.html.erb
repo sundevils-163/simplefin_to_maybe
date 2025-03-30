@@ -27,8 +27,7 @@
             <button class="openModalBtn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400" 
               display-name="<%= setting.display_name %>"
               data-key="<%= setting.key %>"
-              data-value="<%= setting.value %>"
-              ecrypted="<%= setting.encrypted %>">
+              data-value="<%= setting.value %>">
               Edit
             </button>
           </td>
@@ -54,7 +53,7 @@
 <br><div id="simplefin_test_result"></div><br><br>
 
 <!-- Database Settings Table -->
-<h2 class="text-2xl font-semibold mb-4">Maybe Settings</h1>
+<h2 class="text-2xl font-semibold mb-4">Maybe Settings</h2>
 <table class="bg-white shadow-md rounded-lg overflow-hidden">
   <thead>
     <tr class="bg-gray-200">
@@ -133,7 +132,7 @@
 <br><div id="maybe_test_result"></div><br><br>
 
 <!-- Other Settings Table -->
-<h2 class="text-2xl font-semibold mb-4">Scheduling Settings</h1>
+<h2 class="text-2xl font-semibold mb-4">Scheduling Settings</h2>
 <table class="bg-white shadow-md rounded-lg overflow-hidden">
   <thead>
     <tr class="bg-gray-200">
@@ -149,6 +148,9 @@
       <% hash.each do |key, default| %>
         <% setting = Setting.find_by(key: key.to_s) %>
         <% value = setting&.value.presence || default %>
+        <% if key.to_s == "synchronization_schedule" %>
+          <% @cron_expression = value.to_s %>
+        <% end %>
         <% is_default = setting&.value.blank? %>
         <tr class="hover:bg-gray-100">
           <td class="py-2 px-4 border-b text-left"><%= setting&.display_name || key.to_s.humanize %></td>
@@ -167,8 +169,29 @@
         </tr>
       <% end %>
     <% end %>
+    <tr class="hover:bg-gray-100">
+    <td class="py-2 px-4 border-b text-left">Last Sync Execution</td>
+    <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrow-right text-gray-500" /></td>
+    <td class="py-2 px-4 border-b text-right">
+      <%= link_to "https://crontab.guru/##{@cron_expression.gsub(" ", "_")}", target: "_blank", rel: "noopener noreferrer", class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
+        <%= Fugit::Cron.parse(@cron_expression).previous_time.strftime("%Y-%m-%d %I:%M:%S %p UTC") %>
+      <% end %>
+    </td>
+    <td class="py-2 px-4 border-b text-center"><button class="text-white px-4 py-2 rounded">|</button></td>
+  </tr>
+  <tr class="hover:bg-gray-100">
+    <td class="py-2 px-4 border-b text-left">Next Sync Execution</td>
+    <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrow-right text-gray-500" /></td>
+    <td class="py-2 px-4 border-b text-right">
+      <%= link_to "https://crontab.guru/##{@cron_expression.gsub(" ", "_")}", target: "_blank", rel: "noopener noreferrer", class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
+        <%= Fugit::Cron.parse(@cron_expression).next_time.strftime("%Y-%m-%d %I:%M:%S %p UTC") %>
+      <% end %>
+    </td>
+    <td class="py-2 px-4 border-b text-center"><button class="text-white px-4 py-2 rounded">|</button></td>
+  </tr>
   </tbody>
 </table>
+
 
 <!-- Modal Structure -->
 <div id="modal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50 hidden">

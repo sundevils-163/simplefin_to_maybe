@@ -24,5 +24,6 @@ module SimplefinToMaybe
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
     config.active_job.queue_adapter = :good_job
+    config.good_job.execution_mode = :async
   end
 end

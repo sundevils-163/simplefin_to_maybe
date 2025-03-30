@@ -276,6 +276,7 @@ DEPENDENCIES
   capybara
   debug
   dotenv-rails
+  fugit
   good_job
   importmap-rails
   jbuilder

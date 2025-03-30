@@ -1,67 +1,47 @@
----
+x-db-env: &db_env
+  POSTGRES_USER: ${POSTGRES_USER:-maybe_user}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-maybe_password}
+  POSTGRES_DB: ${POSTGRES_DB:-maybe_production}
+
+x-rails-env: &rails_env
+  <<: *db_env
+  SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+  RAILS_FORCE_SSL: "false"
+  RAILS_ASSUME_SSL: "false"
+  DB_HOST: db
+  DB_PORT: 5432
+
 services:
-  db:
-    container_name: db
-    restart: unless-stopped
-    image: postgres:16.8
-    networks:
-      - simplefinmaybe
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      DB_HOST: db
-      DB_PORT: 5432
+  web:
+    container_name: simplefin_to_maybe
+    build: .
     volumes:
-      - sf-to-maybe-data:/var/lib/postgresql/data
+      - app-storage:/rails/storage
+    ports:
+      - 9501:3000
+    restart: unless-stopped
+    environment:
+      <<: *rails_env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    container_name: simplefin_to_maybe-db
+    image: postgres:16.8
+    restart: unless-stopped
+    ports:
+      - 9502:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      <<: *db_env
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  app:
-    container_name: simplefin-to-maybe
-    restart: unless-stopped
-    build: .
-    depends_on:
-      - db
-    networks:
-      - simplefinmaybe
-    ports:
-      - "9501:3000"
-    environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}"
-      RAILS_ENV: production
-      GOOD_JOB_EXECUTION_MODE: async
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_HOST: db
-      DB_PORT: 5432
-    volumes:
-      - .:/app
-  
-  worker:
-    container_name: worker
-    restart: unless-stopped
-    build: .
-    command: ["sh", "-c", "until nc -z db 5432; do sleep 1; done; bundle exec good_job start"]
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - simplefinmaybe
-    environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}"
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_HOST: db
-      DB_PORT: 5432
-
-networks:
-  simplefinmaybe:
-
 volumes:
-  sf-to-maybe-data:
+  app-storage:
+  postgres-data:

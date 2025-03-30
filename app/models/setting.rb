@@ -1,34 +1,14 @@
 class Setting < ApplicationRecord
   validates :key, presence: true, uniqueness: true
 
-  encrypts :encrypted_value, deterministic: true # Rails 7 ActiveRecord Encryption
+  after_update :update_cron_schedule_if_needed
 
-  # Override value getter to return either encrypted or plaintext value
-  def value
-    encrypted? ? encrypted_value : super
-  end
+  private
 
-  # Override value setter to store in the correct column
-  def value=(new_value)
-    if encrypted?
-      self.encrypted_value = new_value
-      self[:value] = nil # Ensure plaintext column is empty
-    else
-      self[:value] = new_value
-      self.encrypted_value = nil # Ensure encrypted column is empty
+  def update_cron_schedule_if_needed
+    if self.key == 'synchronization_schedule' && saved_change_to_value?
+      # Call the method to update the cron job schedule when the setting changes
+      update_cron_schedule
     end
-  end
-
-  # Retrieve a setting's value
-  def self.get(key)
-    find_by(key: key)&.value
-  end
-
-  # Set a setting's value
-  def self.set(key, value, encrypted: false)
-    setting = find_or_initialize_by(key: key)
-    setting.encrypted = encrypted
-    setting.value = value
-    setting.save!
   end
 end

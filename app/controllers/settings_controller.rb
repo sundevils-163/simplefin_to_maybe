@@ -115,6 +115,6 @@ class SettingsController < ApplicationController
 
   # Strong parameters for updating setting
   def setting_params
-    params.require(:setting).permit(:key, :value)
+    params.require(:setting).permit(:value)
   end
 end

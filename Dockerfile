@@ -1,25 +1,67 @@
-# Use an official Ruby image
-FROM ruby:3.3.7
+# syntax = docker/dockerfile:1
 
-# Install dependencies
-RUN apt-get update -qq && apt-get install -y nodejs npm postgresql-client yarn
+# Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
+ARG RUBY_VERSION=3.3.7
+FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim AS base
 
-# Set working directory
-WORKDIR /app
+# Rails app lives here
+WORKDIR /rails
 
-# Install bundler
-COPY Gemfile Gemfile.lock ./
+# Install base packages
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y curl libvips libyaml-dev postgresql-client
+
+# Set production environment
+ARG BUILD_COMMIT_SHA
+ENV RAILS_ENV="production" \
+    BUNDLE_DEPLOYMENT="1" \
+    BUNDLE_PATH="/usr/local/bundle" \
+    BUNDLE_WITHOUT="development" \
+    BUILD_COMMIT_SHA=${BUILD_COMMIT_SHA}
+    
+# Throw-away build stage to reduce size of final image
+FROM base AS build
+
+# Install packages needed to build gems
+RUN apt-get install --no-install-recommends -y build-essential libpq-dev git pkg-config
+
+# Install application gems
+COPY .ruby-version Gemfile Gemfile.lock ./
 RUN bundle install
 
-# Copy the entire project
+RUN rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git
+
+RUN bundle exec bootsnap precompile --gemfile -j 0
+
+# Copy application code
 COPY . .
 
-# Precompile assets and run database migrations
-RUN bundle exec rake assets:precompile
-RUN bundle exec rake db:migrate
+# Ensure start.sh is executable
+RUN chmod +x /rails/start.sh
 
-# Expose port 3000 for the Rails app
+# Precompile bootsnap code for faster boot times
+RUN bundle exec bootsnap precompile -j 0 app/ lib/
+
+# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
+RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+
+# Final stage for app image
+FROM base
+
+# Clean up installation packages to reduce image size
+RUN rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Copy built artifacts: gems, application
+COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
+COPY --from=build /rails /rails
+
+# Run and own only the runtime files as a non-root user for security
+RUN groupadd --system --gid 1000 rails && \
+    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
+    chown -R rails:rails db log storage tmp
+USER 1000:1000
+
 EXPOSE 3000
 
 # Start the Rails server
-CMD ["rails", "server", "-b", "0.0.0.0"]
+CMD ["bash", "/rails/start.sh"]

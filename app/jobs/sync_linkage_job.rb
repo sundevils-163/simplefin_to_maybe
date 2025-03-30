@@ -53,7 +53,7 @@ class SyncLinkageJob < ApplicationJob
     
           # If this transaction hasn't been synced yet, create a new transaction in Maybe
           unless transactions_in_maybe.any? { |t| t["plaid_id"] == transaction_id }
-            maybe_client.new_transaction(maybe_account.identifier, simplefin_transaction, simplefin_account.simplefin_id_sanitized, simplefin_account.currency)
+            maybe_client.new_transaction(maybe_account.identifier, simplefin_transaction, linkage.simplefin_id_sanitized, simplefin_account.currency)
           end
         end
       else
