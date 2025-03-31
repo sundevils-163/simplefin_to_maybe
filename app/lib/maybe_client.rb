@@ -41,15 +41,14 @@ class MaybeClient
   
     query = <<-SQL
       SELECT
-        a.id,
-        a.name,
-        a.family_id,
-        a.currency,
-        a.accountable_type,
-        a.subtype,
-        a.plaid_account_id,
-      FROM public.accounts AS a
-      WHERE a.family_id = $1;
+        id,
+        name,
+        family_id,
+        currency,
+        accountable_type,
+        subtype
+      FROM public.accounts
+      WHERE family_id = $1;
     SQL
   
     execute(query, [family_id])
@@ -158,7 +157,7 @@ class MaybeClient
       INSERT INTO public.account_entries(
         account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at, plaid_id
       ) VALUES (
-        $1, 'Account::Transaction', $2, $3, $4, (TO_TIMESTAMP($5)::DATE), $6, NOW(), NOW(), $7, $8
+        $1, 'Account::Transaction', $2, $3, $4, (TO_TIMESTAMP($5)::DATE), $6, NOW(), NOW(), $7
       );
     SQL
     execute(query, [account_id, transaction_uuid, adjusted_amount, currency, short_date, display_name, simplefin_txn_id])

@@ -104,7 +104,8 @@ class SettingsController < ApplicationController
 
   def remove_nonexistant_accounts(accounts, account_type)
     account_ids = accounts.map { |account| account.dig("id") }
-    Account.where(account_type: account_type).where.not(identifier: account_ids).destroy_all
+    Account.where(account_type: account_type).where.not(identifier: account_ids)
+      .reject(&:in_use?).each(&:destroy)
   end
 
   def set_setting

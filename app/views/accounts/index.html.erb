@@ -6,6 +6,7 @@
       <tr class="bg-gray-200">
         <th class="text-left py-2 px-4 border-b">Name</th>
         <th class="text-left py-2 px-4 border-b">Currency</th>
+        <th class="text-left py-2 px-4 border-b">In Use?</th>
         <th class="text-left py-2 px-4 border-b">Identifier</th>
         <% if this_type[:account_type] == "maybe" %>
           <th class="text-left py-2 px-4 border-b">Account Type</th>
@@ -16,16 +17,28 @@
     </thead>
     <tbody>
       <% Account.where(account_type: this_type[:account_type]).each do |account| %>
+        <% in_use = account.in_use? %>
         <tr class="hover:bg-gray-100">
           <td class="py-2 px-4 border-b text-left"><%= account.display_name %></td>
           <td class="py-2 px-4 border-b text-left"><%= account.currency %></td>
+          <td class="py-2 px-4 border-b text-center">
+            <% if in_use %>
+              <%= link_to linkages_path, class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
+                <%= "Yes" %>
+              <% end %>
+            <% else %>
+              <%= "No" %>
+            <% end %>
+          </td>
           <td class="py-2 px-4 border-b text-left"><%= account.identifier %></td>
           <% if this_type[:account_type] == "maybe" %>
             <td class="py-2 px-4 border-b text-left"><%= account.accountable_type %></td>
           <% end %>
           <td class="py-2 px-4 border-b text-left"><%= account.updated_at %></td>
           <td class="py-2 px-4 border-b text-center">
-            <i class="fas fa-trash-alt text-blue-500 hover:text-blue-700" />
+            <%= button_to account_path(account), method: :delete, disabled: in_use, class: in_use ? "text-gray-400 cursor-not-allowed" : "text-blue-500 hover:text-blue-700" do %>
+              <i class="fas fa-trash-alt"></i>
+            <% end %>
           </td>
         </tr>
       <% end %>

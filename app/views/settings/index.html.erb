@@ -143,13 +143,15 @@
     </tr>
   </thead>
   <tbody>
-    <% settings = [{ lookback_days: "7" },{ synchronization_schedule: "0 5,23 * * *" }] %>
+    <% settings = [{ lookback_days: "7" },{ synchronization_schedule: "Unscheduled" }] %>
     <% settings.each do |hash| %>
       <% hash.each do |key, default| %>
         <% setting = Setting.find_by(key: key.to_s) %>
         <% value = setting&.value.presence || default %>
-        <% if key.to_s == "synchronization_schedule" %>
+        <% if key.to_s == "synchronization_schedule" && value != "Unscheduled" %>
           <% @cron_expression = value.to_s %>
+        <% else %>
+          <% @cron_expression = "0_19_*_*_*" %>
         <% end %>
         <% is_default = setting&.value.blank? %>
         <tr class="hover:bg-gray-100">
@@ -170,25 +172,19 @@
       <% end %>
     <% end %>
     <tr class="hover:bg-gray-100">
-    <td class="py-2 px-4 border-b text-left">Last Sync Execution</td>
-    <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrow-right text-gray-500" /></td>
-    <td class="py-2 px-4 border-b text-right">
-      <%= link_to "https://crontab.guru/##{@cron_expression.gsub(" ", "_")}", target: "_blank", rel: "noopener noreferrer", class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
-        <%= Fugit::Cron.parse(@cron_expression).previous_time.strftime("%Y-%m-%d %I:%M:%S %p UTC") %>
-      <% end %>
-    </td>
-    <td class="py-2 px-4 border-b text-center"><button class="text-white px-4 py-2 rounded">|</button></td>
-  </tr>
-  <tr class="hover:bg-gray-100">
-    <td class="py-2 px-4 border-b text-left">Next Sync Execution</td>
-    <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrow-right text-gray-500" /></td>
-    <td class="py-2 px-4 border-b text-right">
-      <%= link_to "https://crontab.guru/##{@cron_expression.gsub(" ", "_")}", target: "_blank", rel: "noopener noreferrer", class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
-        <%= Fugit::Cron.parse(@cron_expression).next_time.strftime("%Y-%m-%d %I:%M:%S %p UTC") %>
-      <% end %>
-    </td>
-    <td class="py-2 px-4 border-b text-center"><button class="text-white px-4 py-2 rounded">|</button></td>
-  </tr>
+      <td class="py-2 px-4 border-b text-left">Next Sync Execution</td>
+      <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrow-right text-gray-500" /></td>
+      <td class="py-2 px-4 border-b text-right">
+        <%= link_to "https://crontab.guru/##{@cron_expression.gsub(" ", "_")}", target: "_blank", rel: "noopener noreferrer", class: "text-blue-500 hover:text-blue-700 p-1.5" do %>
+          <% if @cron_expression == "0_19_*_*_*" %>
+            <%= "Unscheduled" %>
+          <% else %>
+            <%= Fugit::Cron.parse(@cron_expression).next_time.strftime("%Y-%m-%d %I:%M:%S %p") %>
+          <% end %>
+        <% end %>
+      </td>
+      <td class="py-2 px-4 border-b text-center"><button class="text-white px-4 py-2 rounded">|</button></td>
+    </tr>
   </tbody>
 </table>
 

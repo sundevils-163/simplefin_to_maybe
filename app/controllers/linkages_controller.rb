@@ -1,5 +1,6 @@
 class LinkagesController < ApplicationController
   before_action :set_linkage, only: [:sync, :destroy]
+  skip_before_action :verify_authenticity_token, only: [:run_all_syncs]  #let the background job invoke without csrf issues
 
   def index
     # Fetch existing linkages
@@ -86,12 +87,12 @@ class LinkagesController < ApplicationController
     # First, permit the required parameters
     permitted_params = params.require(:linkage).permit(:simplefin_account_id, :maybe_account_id)
   
-    # Sanitize simplefin_account_id by removing the "ACT-" prefix (if it exists)
-    if permitted_params[:simplefin_account_id].present?
-      sanitized_id = permitted_params[:simplefin_account_id].sub(/^ACT-/, "")
-      # Add the sanitized value as a new key 'simplefin_id_sanitized'
-      permitted_params[:simplefin_id_sanitized] = sanitized_id
-    end
+    ## Sanitize simplefin_account_id by removing the "ACT-" prefix (if it exists)
+    #if permitted_params[:simplefin_account_id].present?
+    #  sanitized_id = permitted_params[:simplefin_account_id].sub(/^ACT-/, "")
+    #  # Add the sanitized value as a new key 'simplefin_id_sanitized'
+    #  permitted_params[:simplefin_id_sanitized] = sanitized_id
+    #end
 
     Rails.logger.info "Sanitized params: #{permitted_params.inspect}"
   

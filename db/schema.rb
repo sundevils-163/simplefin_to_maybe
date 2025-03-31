@@ -118,7 +118,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_30_070221) do
 
   create_table "linkages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "simplefin_account_id"
-    t.uuid "simplefin_id_sanitized"
     t.uuid "maybe_account_id"
     t.datetime "last_sync"
     t.string "sync_status"

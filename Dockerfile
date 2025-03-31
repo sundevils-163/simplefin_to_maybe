@@ -8,8 +8,8 @@ FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim AS base
 WORKDIR /rails
 
 # Install base packages
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libvips libyaml-dev postgresql-client
+RUN apt-get update -qq && apt-get install --no-install-recommends -y \
+    curl libvips libyaml-dev postgresql-client tzdata
 
 # Set production environment
 ARG BUILD_COMMIT_SHA
