@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-  resources :linkages, only: [:index, :create, :destroy] do
+  resources :linkages, only: [:index, :create, :update, :destroy] do
     member do
       post :sync
       get :sync_status

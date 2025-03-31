@@ -8,8 +8,11 @@ class Linkage < ApplicationRecord
   after_initialize :set_default_sync_status, if: :new_record?
 
   def sync
-    update(sync_status: :pending)
-    SyncLinkageJob.perform_later(self)
+    Rails.logger.info "Queuing sync for #{self.id}"
+    if self.enabled?
+      update(sync_status: :pending)
+      SyncLinkageJob.perform_later(self)
+    end
   end
 
   private

@@ -121,6 +121,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_30_070221) do
     t.uuid "maybe_account_id"
     t.datetime "last_sync"
     t.string "sync_status"
+    t.boolean "enabled", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

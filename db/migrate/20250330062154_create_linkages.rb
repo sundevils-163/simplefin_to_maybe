@@ -5,6 +5,7 @@ class CreateLinkages < ActiveRecord::Migration[7.1]
       t.uuid :maybe_account_id
       t.datetime :last_sync
       t.string :sync_status
+      t.boolean :enabled, default: true, null: false
       t.timestamps
     end
   end
