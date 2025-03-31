@@ -1,7 +1,7 @@
 x-db-env: &db_env
-  POSTGRES_USER: ${POSTGRES_USER:-maybe_user}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-maybe_password}
-  POSTGRES_DB: ${POSTGRES_DB:-maybe_production}
+  POSTGRES_USER: ${POSTGRES_USER:-simplefin_to_maybe}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-simplefin_to_maybe}
+  POSTGRES_DB: ${POSTGRES_DB:-simplefin_to_maybe}
   TZ: ${TZ}
 
 x-rails-env: &rails_env
@@ -31,8 +31,6 @@ services:
     container_name: simplefin_to_maybe-db
     image: postgres:16.8
     restart: unless-stopped
-    ports:
-      - 9502:5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
