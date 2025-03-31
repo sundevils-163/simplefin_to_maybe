@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   get 'test_maybe', to: 'settings#test_maybe'
   patch '/settings/:key', to: 'settings#update', as: 'update_setting'
 
+  post '/reset_database', to: 'database#reset'
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
