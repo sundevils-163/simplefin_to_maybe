@@ -1,0 +1,2 @@
+web: rake assets:precompile && bin/rails server
+css: bin/rails tailwindcss:watch

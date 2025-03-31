@@ -1,0 +1,19 @@
+// Define regex patterns for each setting key
+    const validationRules = {
+        simplefin_username: {
+            pattern: /^[A-F0-9]{64}$/, 
+            message: "Enter your 64-character SimpleFIN username."
+        },
+        simplefin_password: {
+            pattern: /^[A-F0-9]{64}$/, 
+            message: "Enter your 64-character SimpleFIN password."
+        },
+        maybe_postgres_port: {
+            pattern: /^\d{2,5}$/,
+            message: "Enter a valid port number (e.g., 5432)."
+        },
+        synchronization_schedule: {
+            pattern: /^[\d\*\:\,]+\s[\d\*\:\,]+\s[\d\*\:\,]+\s[\d\*\:\,]+\s[\d\*\:\,]+$/,
+            message: "Enter a valid cron expression (e.g., 0 7 * * *)."
+        }
+    };
