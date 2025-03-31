@@ -87,4 +87,4 @@ If everything is working, you will see the SimpleFIN to Maybe home screen.
 
 ### Step 5: Application Configuration
 
-Review the settings in the [Web App Configuration](docs/config.md) readme.
+Review the settings in the [Web App Configuration](config.md) readme.
