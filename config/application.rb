@@ -23,8 +23,11 @@ module SimplefinToMaybe
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
-    config.active_job.queue_adapter = :good_job
-    config.good_job.execution_mode = :queue
+    config.time_zone = ENV['TZ'] || 'UTC'
 
+    config.active_job.queue_adapter = :good_job
+    config.good_job.enable_cron = true
+    config.good_job.execution_mode = :async
+    config.good_job.max_threads = 2
   end
 end
