@@ -28,6 +28,14 @@
   100% {opacity: 0.4; }
 }
 
+input:checked + .block {
+  background-color: #10b981; /* Green when enabled */
+}
+
+input:checked + .block + .dot {
+  background-color: #ffffff;
+}
+
 .sync-status {
   height: 38px; /* Adjust height to fit your design */
   width: auto;  /* Adjust width to fit your design */
