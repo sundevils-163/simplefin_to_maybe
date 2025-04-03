@@ -14,7 +14,7 @@
       <% setting = Setting.find_by(key: key) %>
       <% if setting %>
         <tr class="hover:bg-gray-100">
-          <td class="py-2 px-4 border-b text-left"><%= setting.display_name %></td>
+          <td class="py-2 px-4 border-b text-left"><%= setting.display_name %> <span class="tooltip-icon" data-tooltip="<%= send("#{key}_information") %>">ⓘ</span></td>
           <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrows-left-right text-gray-500" /></td>
           <td class="py-2 px-4 border-b text-right">
             <% if setting.value.present? %>
@@ -75,7 +75,7 @@
       <% value = setting&.value.presence || default %>
       <% is_default = setting&.value.blank? %>
       <tr class="hover:bg-gray-100">
-        <td class="py-2 px-4 border-b text-left"><%= setting&.display_name || key.to_s.humanize %></td>
+        <td class="py-2 px-4 border-b text-left"><%= setting.display_name %> <span class="tooltip-icon" data-tooltip="<%= send("#{key}_information") %>">ⓘ</span></td>
         <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrows-left-right text-gray-500" /></td>
         <td class="py-2 px-4 border-b text-right <%= "text-gray-400" if is_default %>">
           <%= value %>
@@ -94,7 +94,7 @@
     <% setting = Setting.find_by(key: "maybe_postgres_password") %>
     <% if setting %>
       <tr class="hover:bg-gray-100">
-        <td class="py-2 px-4 border-b text-left"><%= setting.display_name %></td>
+        <td class="py-2 px-4 border-b text-left"><%= setting.display_name %> <span class="tooltip-icon" data-tooltip="<%= send("maybe_postgres_password_information") %>">ⓘ</span></td>
         <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrows-left-right text-gray-500" /></td>
         <td class="py-2 px-4 border-b text-right">
           <% if setting.value.present? %>
@@ -155,7 +155,7 @@
         <% end %>
         <% is_default = setting&.value.blank? %>
         <tr class="hover:bg-gray-100">
-          <td class="py-2 px-4 border-b text-left"><%= setting&.display_name || key.to_s.humanize %></td>
+          <td class="py-2 px-4 border-b text-left"><%= setting.display_name %> <span class="tooltip-icon" data-tooltip="<%= send("#{key}_information") %>">ⓘ</span></td>
           <td class="py-2 px-4 border-b text-center"><i class="fas fa-arrows-left-right text-gray-500" /></td>
           <td class="py-2 px-4 border-b text-right <%= "text-gray-400" if is_default %>">
             <%= value %>

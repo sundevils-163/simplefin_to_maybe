@@ -28,6 +28,19 @@
   100% {opacity: 0.4; }
 }
 
+.tooltip-icon:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  background: #333;
+  color: #fff;
+  padding: 5px;
+  font-size: 14px;
+  border-radius: 5px;
+  white-space: normal;
+  word-wrap: break-word;
+  margin-left: 10px;
+}
+
 input:checked + .block {
   background-color: #10b981; /* Green when enabled */
 }
