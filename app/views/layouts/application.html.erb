@@ -13,39 +13,51 @@
 
   <body class="pb-16">
     <nav class="bg-gray-900 text-white p-4 fixed w-full top-0 z-50 shadow-lg">
-      <div class="container flex items-center justify-between">
+      <div class="container flex flex-wrap items-center gap-10 px-6">
 
         <!-- Left: Icons -->
-        <div class="flex space-x-4 ml-2">
+        <div class="flex items-center gap-4">
           <%= link_to "https://beta-bridge.simplefin.org/", target: "_blank", rel: "noopener noreferrer" do %>
-            <%= image_tag("simplefin_logo.svg", class: "w-5 h-5") %>
+            <%= image_tag("simplefin_logo.svg", class: "w-5 h-5 shrink-0") %>
           <% end %>
           <i class="fas fa-arrow-right text-lg text-white"></i>
           <%= link_to "https://maybefinance.com", target: "_blank", rel: "noopener noreferrer" do %>
-            <%= image_tag("maybe.png", class: "w-5 h-5") %>
+            <%= image_tag("maybe.png", class: "w-5 h-5 shrink-0") %>
           <% end %>
         </div>
 
         <!-- Vertical Separator -->
-        <div class="border-l-4 border-gray-500 h-6 mx-4 mr-auto ml-7"></div>
+        <div class="border-l-4 border-gray-500 h-6"></div>
 
         <!-- Center: Navigation -->
-        <div class="flex space-x-6 mr-265">
-          <%= link_to root_path, class: "flex items-center space-x-2 hover:text-gray-300" do %>
+        <div class="flex items-center gap-5">
+          <%= link_to root_path, class: "flex items-center gap-3 hover:text-gray-300" do %>
             <i class="fas fa-home"></i>
             <span>Home</span>
           <% end %>
 
-          <%= link_to accounts_path, class: "flex items-center space-x-2 hover:text-gray-300" do %>
+          <%= link_to accounts_path, class: "flex items-center gap-3 hover:text-gray-300" do %>
             <i class="fas fa-file-invoice-dollar"></i>
             <span>Accounts</span>
           <% end %>
 
-          <%= link_to settings_path, class: "flex items-center space-x-2 hover:text-gray-300" do %>
+          <%= link_to settings_path, class: "flex items-center gap-3 hover:text-gray-300" do %>
             <i class="fas fa-cog"></i>
             <span>Configuration</span>
           <% end %>
         </div>
+
+        <!-- Vertical Separator -->
+        <div class="border-l-4 border-gray-500 h-6"></div>
+
+        <!-- Right: Links -->
+        <div class="flex items-center gap-5">
+          <%= link_to "https://github.com/steveredden/simplefin_to_maybe", target: "_blank", rel: "noopener noreferrer", class: "flex items-center gap-3 hover:text-gray-300" do %>
+            <i class="fa-brands fa-github"></i>
+            <span>SimpleFIN to Maybe (<%= Rails.configuration.app_version %>)</span>
+          <% end %>
+        </div>
+
       </div>
     </nav>
     <div class="pt-14 pb-20 pl-10 pr-10">
