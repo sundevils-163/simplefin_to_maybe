@@ -1,0 +1,1 @@
+Rails.configuration.app_version = ENV.fetch("APP_VERSION", "dev")
