@@ -13,17 +13,15 @@ class RunAllSyncsJob < ApplicationJob
     url = "http://localhost:#{port}/linkages/run_all_syncs"
     uri = URI.parse(url)
 
-    #logger.tagged("RunAllSyncsJob") { logger.info "POST'ing to #{url}"}
+    Rails.logger.info "POST'ing to #{url}"
 
     begin
       response = Net::HTTP.post(uri, {}.to_json, { "Content-Type" => "application/json" })
       
       Rails.logger.info "HTTP Response Code: #{response.code}"
       Rails.logger.info "HTTP Response Body: #{response.body}"
-      #logger.tagged("RunAllSyncsJob") { logger.info "[#{response.code}] #{response.body}"}
     rescue => e
       Rails.logger.error "HTTP Request failed: #{e.message}"
-      #logger.tagged("RunAllSyncsJob") { logger.error "POST'ing to #{url}"}
     end
 
     # Schedule the next sync
