@@ -65,26 +65,6 @@ class MaybeClient
     execute(query, [account_id, start_date])
   end
 
-  #def new_simplefin_import(account_row, simplefin_account_id)
-  #  family_id = account_row.maybe_family_id
-  #  account_id = account_row.identifier
-  #
-  #  query = <<-SQL
-  #    INSERT INTO public.imports(id, family_id, account_id, created_at, updated_at, type, status) 
-  #    VALUES ($1, $2, $3, NOW(), NOW(), 'MintImport', 'importing')
-  #    RETURNING id;
-  #  SQL
-  #  execute(query, [simplefin_account_id, family_id, account_id])
-  #
-  #  query = <<-SQL
-  #    UPDATE public.accounts 
-  #    SET import_id = $1 
-  #    WHERE id = $2;
-  #  SQL
-  #  execute(query, [simplefin_account_id, account_id])
-  #  return
-  #end
-
   def upsert_account_valuation(account_id, simplefin_account)
     valuation_uuid = SecureRandom.uuid
     amount = simplefin_account.dig("balance")
