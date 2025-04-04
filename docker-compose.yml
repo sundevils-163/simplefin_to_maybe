@@ -18,6 +18,7 @@ services:
     image: ghcr.io/steveredden/simplefin_to_maybe:latest
     volumes:
       - app-storage:/rails/storage
+      - ./logs:/rails/log
     ports:
       - 9501:3000
     restart: unless-stopped
