@@ -14,7 +14,10 @@ class SimplefinClient
 
   # Method to fetch all accounts, balances only
   def get_accounts
-    query_params = { "balances-only" => 1 }
+    query_params = {
+      "balances-only" => 1,
+      "start-date" => (Time.now + (24 * 60 * 60)).to_i   #future date to avoid grabbing any transactions
+    }
     invoke_request("/accounts", query_params)
   end
 
@@ -22,6 +25,7 @@ class SimplefinClient
   def get_account(account_id)
     query_params = {
       "balances-only" => 1,
+      "start-date" => (Time.now + (24 * 60 * 60)).to_i,   #future date to avoid grabbing any transactions
       "account" => URI.encode_www_form_component(account_id)
     }
     invoke_request("/accounts", query_params)
