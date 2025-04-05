@@ -54,7 +54,7 @@
             </button>
           </td>
           <td class="py-2 px-4 border-b text-center">
-            <img id="sync-spinner-<%= linkage.id %>" src="<%= asset_path('fe718d-transparent-spinner.gif') %>" alt="Loading..." class="sync-status" style="display: none;" data-spinner-url="<%= asset_path('fe718d-transparent-spinner.gif') %>" data-checkmark-url="<%= asset_path('blue-done.png') %>"></img>
+            <img id="sync-spinner-<%= linkage.id %>" src="<%= asset_path('fe718d-transparent-spinner.gif') %>" alt="Loading..." class="sync-status" style="display: none;" data-spinner-url="<%= asset_path('fe718d-transparent-spinner.gif') %>" data-checkmark-url="<%= asset_path('blue-done.png') %>" data-error-url="<%= asset_path('red-error.png') %>"></img>
           </td>
           <td class="py-2 px-4 border-b text-center">
             <%= button_to linkage_path(linkage), method: :delete, data: {}, class: "text-blue-500 hover:text-blue-700" do %>
@@ -131,11 +131,11 @@
             const spinner = document.getElementById(`sync-spinner-${linkageId}`);
             const lastSyncElement = document.getElementById(`last-sync-${linkageId}`);
 
-            if (data.sync_status === "complete") {
+            if (["complete", "error"].includes(data.sync_status)) {
 
               const spinner = document.getElementById(`sync-spinner-${linkageId}`);
-              // Change spinner to checkmark image
-              spinner.src = spinner.dataset.checkmarkUrl;
+              // Change spinner to checkmark or X image
+              spinner.src = data.sync_status === "complete" ? spinner.dataset.checkmarkUrl : spinner.dataset.errorUrl;
 
               const date = new Date(data.last_sync);
 
