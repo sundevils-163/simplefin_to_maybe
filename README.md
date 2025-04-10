@@ -20,11 +20,19 @@ Once linked, you can define a cron schedule for automatic synchronization of tra
 
 [Web App Configuration](docs/config.md)
 
+## Recommendations
+
+In Maybe, manually sync your accounts frequently.
+
+![refresh](/docs/assets/images/account-sync.png)
+
+Also refresh (F5) your browser often.
+
 ## To Do
 
 - [x] Transactions
 - [x] Balances
-- [X] Docker Compose?
-- [X] Web UI?
+- [X] Docker Compose
+- [X] Web UI
 - [ ] Securities/Trades/Holdings
 - [ ] More...?
