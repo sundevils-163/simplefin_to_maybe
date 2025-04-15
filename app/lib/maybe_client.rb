@@ -75,9 +75,8 @@ class MaybeClient
   end
   
   def get_simplefin_transactions(account_id, start_date)
-    entries_table = @entries_table
     query = <<-SQL
-      SELECT plaid_id FROM #{entries_table}
+      SELECT plaid_id FROM #{@entries_table}
       WHERE account_id = $1
       AND plaid_id IS NOT NULL
       AND date >= (TO_TIMESTAMP($2)::DATE)
@@ -87,9 +86,6 @@ class MaybeClient
   end
 
   def upsert_account_valuation(account_id, simplefin_account)
-    entries_table = @entries_table
-    valuations_table = @valuations_table
-
     valuation_uuid = SecureRandom.uuid
     amount = simplefin_account.dig("balance")
     currency = simplefin_account.dig("currency")
@@ -97,7 +93,7 @@ class MaybeClient
   
     # Check if a row exists with the same account_id and date
     select_query = <<-SQL
-      SELECT id FROM #{entries_table}
+      SELECT id FROM #{@entries_table}
       WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) AND entryable_type = $3 LIMIT 1;
     SQL
     existing_entry = execute(select_query, [account_id, date, @valuation_key]).first
@@ -109,7 +105,7 @@ class MaybeClient
 
       valuation_uuid = existing_entry["id"]
       update_query = <<-SQL
-        UPDATE #{entries_table}
+        UPDATE #{@entries_table}
         SET amount = $1, updated_at = NOW()
         WHERE id = $2;
       SQL
@@ -117,7 +113,7 @@ class MaybeClient
 
       # also update valuations timestamp
       valuation_update_query = <<-SQL
-        UPDATE #{valuations_table}
+        UPDATE #{@valuations_table}
         SET updated_at = NOW()
         WHERE id = $1;
       SQL
@@ -128,7 +124,7 @@ class MaybeClient
       Rails.logger.info "Adding a Balance Update..."
 
       insert_query = <<-SQL
-        INSERT INTO #{entries_table} (
+        INSERT INTO #{@entries_table} (
           account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at
         ) VALUES (
           $1, $2, $3, $4, $5, (TO_TIMESTAMP($6)::DATE), 'Balance Update', NOW(), NOW()
@@ -137,7 +133,7 @@ class MaybeClient
       execute(insert_query, [account_id, @valuation_key, valuation_uuid, amount, currency, date])
 
       insert_valuation_query = <<-SQL
-        INSERT INTO #{valuations_table} (
+        INSERT INTO #{@valuations_table} (
           id, created_at, updated_at
         ) VALUES (
           $1, NOW(), NOW()
@@ -148,9 +144,6 @@ class MaybeClient
   end
   
   def new_transaction(account_id, simplefin_transaction_record, currency)
-    entries_table = @entries_table
-    transactions_table = @transactions_table
-
     amount = simplefin_transaction_record.dig("amount")
     short_date = simplefin_transaction_record.dig("posted")
     display_name = simplefin_transaction_record.dig("description")
@@ -161,7 +154,7 @@ class MaybeClient
   
     # Insert the entries entry
     query = <<-SQL
-      INSERT INTO #{entries_table} (
+      INSERT INTO #{@entries_table} (
         account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at, plaid_id
       ) VALUES (
         $1, $2, $3, $4, $5, (TO_TIMESTAMP($6)::DATE), $7, NOW(), NOW(), $8
@@ -171,7 +164,7 @@ class MaybeClient
   
     # Insert the transaction entry
     query = <<-SQL
-      INSERT INTO #{transactions_table} (
+      INSERT INTO #{@transactions_table} (
         id, created_at, updated_at
       ) VALUES (
         $1, NOW(), NOW()
