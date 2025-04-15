@@ -87,8 +87,8 @@ class SyncLinkageJob < ApplicationJob
       Rails.logger.info "[#{linkage.id}] Setting Linkage Status to 'Complete'"
       linkage.update(sync_status: :complete, last_sync: Time.current)
       maybe_client.close
-    rescue Net::ReadTimeout => e
-      Rails.logger.error "[#{linkage.id}] Failed to retrieve data from SimpleFIN: #{e.message}"
+    rescue Net::ReadTimeout, ActiveRecord::StatementInvalid, NoMethodError => e
+      Rails.logger.error "[#{linkage.id}] An error occurred: #{e.message}"
       Rails.logger.info "[#{linkage.id}] Setting Linkage Status to 'Error'"
       linkage.update(sync_status: :error)
       maybe_client.close

@@ -30,7 +30,7 @@ This command will do the following:
 1. Fetch the sample docker compose file from the public Github repository
 2. Creates a file in your current directory called `docker-compose.yml` with the contents of the example file
 
-At this point, the only file in your current working directory should be `compose.yml`.
+At this point, the only file in your current working directory should be `docker-compose.yml`.
 
 ### Step 3 : Configure your environment
 

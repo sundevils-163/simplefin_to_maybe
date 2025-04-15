@@ -20,6 +20,22 @@ class MaybeClient
         password: password
       )
       @connected = true
+      version = get_latest_schema_migration
+      if version >= 20250413141446
+        Rails.logger.info "Detected schema migration version #{version}; Using new simplified schema!"
+        @entries_table = "public.entries"
+        @valuations_table = "public.valuations"
+        @valuation_key = "Valuation"
+        @transactions_table = "public.transactions"
+        @transaction_key = "Transaction"
+      else
+        Rails.logger.info "Detected schema migration version #{version}; Using old Account:: schema!"
+        @entries_table = "public.account_entries"
+        @valuations_table = "public.account_valuations"
+        @valuation_key = "Account::Valuation"
+        @transactions_table = "public.account_transactions"
+        @transaction_key = "Account::Transaction"
+      end
     rescue PG::Error => e
       Rails.logger.error "Connection error: #{e.message}"
       @connected = false
@@ -29,6 +45,10 @@ class MaybeClient
 
   def connected?
     @connected
+  end
+
+  def get_latest_schema_migration
+    execute("SELECT version FROM public.schema_migrations ORDER BY version DESC LIMIT 1")&.first&.dig("version")&.to_i
   end
 
   def get_families
@@ -55,8 +75,9 @@ class MaybeClient
   end
   
   def get_simplefin_transactions(account_id, start_date)
+    entries_table = @entries_table
     query = <<-SQL
-      SELECT plaid_id FROM public.account_entries
+      SELECT plaid_id FROM #{entries_table}
       WHERE account_id = $1
       AND plaid_id IS NOT NULL
       AND date >= (TO_TIMESTAMP($2)::DATE)
@@ -66,6 +87,9 @@ class MaybeClient
   end
 
   def upsert_account_valuation(account_id, simplefin_account)
+    entries_table = @entries_table
+    valuations_table = @valuations_table
+
     valuation_uuid = SecureRandom.uuid
     amount = simplefin_account.dig("balance")
     currency = simplefin_account.dig("currency")
@@ -73,10 +97,10 @@ class MaybeClient
   
     # Check if a row exists with the same account_id and date
     select_query = <<-SQL
-      SELECT id FROM public.account_entries 
-      WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) AND entryable_type = 'Account::Valuation' LIMIT 1;
+      SELECT id FROM #{entries_table}
+      WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) AND entryable_type = $3 LIMIT 1;
     SQL
-    existing_entry = execute(select_query, [account_id, date]).first
+    existing_entry = execute(select_query, [account_id, date, @valuation_key]).first
   
     if existing_entry
       # Update existing row
@@ -85,15 +109,15 @@ class MaybeClient
 
       valuation_uuid = existing_entry["id"]
       update_query = <<-SQL
-        UPDATE public.account_entries 
+        UPDATE #{entries_table}
         SET amount = $1, updated_at = NOW()
         WHERE id = $2;
       SQL
       execute(update_query, [amount, valuation_uuid])
 
-      # also update account_valuations timestamp
+      # also update valuations timestamp
       valuation_update_query = <<-SQL
-        UPDATE public.account_valuations
+        UPDATE #{valuations_table}
         SET updated_at = NOW()
         WHERE id = $1;
       SQL
@@ -104,16 +128,16 @@ class MaybeClient
       Rails.logger.info "Adding a Balance Update..."
 
       insert_query = <<-SQL
-        INSERT INTO public.account_entries (
+        INSERT INTO #{entries_table} (
           account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at
         ) VALUES (
-          $1, 'Account::Valuation', $2, $3, $4, (TO_TIMESTAMP($5)::DATE), 'Balance Update', NOW(), NOW()
+          $1, $2, $3, $4, $5, (TO_TIMESTAMP($6)::DATE), 'Balance Update', NOW(), NOW()
         );
       SQL
-      execute(insert_query, [account_id, valuation_uuid, amount, currency, date])
+      execute(insert_query, [account_id, @valuation_key, valuation_uuid, amount, currency, date])
 
       insert_valuation_query = <<-SQL
-        INSERT INTO public.account_valuations (
+        INSERT INTO #{valuations_table} (
           id, created_at, updated_at
         ) VALUES (
           $1, NOW(), NOW()
@@ -124,6 +148,9 @@ class MaybeClient
   end
   
   def new_transaction(account_id, simplefin_transaction_record, currency)
+    entries_table = @entries_table
+    transactions_table = @transactions_table
+
     amount = simplefin_transaction_record.dig("amount")
     short_date = simplefin_transaction_record.dig("posted")
     display_name = simplefin_transaction_record.dig("description")
@@ -132,19 +159,19 @@ class MaybeClient
     transaction_uuid = SecureRandom.uuid
     adjusted_amount = BigDecimal(amount.to_s) * -1
   
-    # Insert the account_entries entry
+    # Insert the entries entry
     query = <<-SQL
-      INSERT INTO public.account_entries(
+      INSERT INTO #{entries_table} (
         account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at, plaid_id
       ) VALUES (
-        $1, 'Account::Transaction', $2, $3, $4, (TO_TIMESTAMP($5)::DATE), $6, NOW(), NOW(), $7
+        $1, $2, $3, $4, $5, (TO_TIMESTAMP($6)::DATE), $7, NOW(), NOW(), $8
       );
     SQL
-    execute(query, [account_id, transaction_uuid, adjusted_amount, currency, short_date, display_name, simplefin_txn_id])
+    execute(query, [account_id, @transaction_key, transaction_uuid, adjusted_amount, currency, short_date, display_name, simplefin_txn_id])
   
-    # Insert the account_transaction entry
+    # Insert the transaction entry
     query = <<-SQL
-      INSERT INTO public.account_transactions(
+      INSERT INTO #{transactions_table} (
         id, created_at, updated_at
       ) VALUES (
         $1, NOW(), NOW()
