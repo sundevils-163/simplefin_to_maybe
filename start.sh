@@ -1,4 +1,8 @@
 #!/bin/bash
+set -e
+
+# Remove any pre-existing server.pid for Rails
+rm -f /rails/tmp/pids/server.pid || true
 
 # Create / Migrate the database
 bundle exec rails db:prepare
