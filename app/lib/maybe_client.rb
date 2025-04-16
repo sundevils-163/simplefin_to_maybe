@@ -85,6 +85,14 @@ class MaybeClient
     execute(query, [account_id, start_date])
   end
 
+  def entry_exists?(account_id, date, type)
+    query = <<~SQL
+      SELECT id FROM #{@entries_table}
+      WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) AND entryable_type = $3 LIMIT 1
+    SQL
+    execute(query, [account_id, date, type]).first
+  end  
+
   def upsert_account_valuation(account_id, simplefin_account)
     valuation_uuid = SecureRandom.uuid
     amount = simplefin_account.dig("balance")
@@ -92,11 +100,7 @@ class MaybeClient
     date = simplefin_account.dig("balance-date")
   
     # Check if a row exists with the same account_id and date
-    select_query = <<-SQL
-      SELECT id FROM #{@entries_table}
-      WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) AND entryable_type = $3 LIMIT 1;
-    SQL
-    existing_entry = execute(select_query, [account_id, date, @valuation_key]).first
+    existing_entry = entry_exists?(account_id, date, @valuation_key)
   
     if existing_entry
       # Update existing row
@@ -187,7 +191,7 @@ class MaybeClient
       result.to_a
     rescue PG::Error => e
       Rails.logger.error "Query execution error: #{e.message}"
-      nil
+      raise e
     end
   end
 

@@ -7,92 +7,113 @@ class SyncLinkageJob < ApplicationJob
 
   def perform(linkage)
     begin
-      Rails.logger.info "[#{linkage.id}] Begin Linkage Sync"
-      Rails.logger.info "[#{linkage.id}] Setting Linkage Status to 'Running'"
-      linkage.update(sync_status: :running)
+      set_status(linkage, :running)
       
       maybe_account = Account.find_by(id: linkage.maybe_account_id)
-      Rails.logger.error "[#{linkage.id}] Maybe Account: '#{maybe_account.display_name}' [#{maybe_account.identifier}]; Type: #{maybe_account.accountable_type}"
       simplefin_account = Account.find_by(id: linkage.simplefin_account_id)
-      Rails.logger.error "[#{linkage.id}] SimpleFIN Account: '#{simplefin_account.display_name}' [#{simplefin_account.identifier}]"
+
+      unless maybe_account && simplefin_account
+        log(linkage, "Missing account(s)", :error)
+        return set_status(linkage, :error)
+      end
+
+      log(linkage, "Maybe Account: '#{maybe_account.display_name}' [#{maybe_account.identifier}]; Type: #{maybe_account.accountable_type}")
+      log(linkage, "SimpleFIN Account: '#{simplefin_account.display_name}' [#{simplefin_account.identifier}]")
 
       maybe_client = MaybeClientService.connect
-      if maybe_client.nil?
-        Rails.logger.error "[#{linkage.id}] Failed to connect to Maybe PostgreSQL"
-        Rails.logger.info "[#{linkage.id}] Setting Linkage Status to 'Error'"
-        linkage.update(sync_status: :error)
-        maybe_client.close
-        return
+      unless maybe_client
+        log(linkage, "Failed to connect to Maybe PostgreSQL", :error)
+        return set_status(linkage, :error)
       end
 
       username = Setting.find_by(key: 'simplefin_username')&.value
       password = Setting.find_by(key: 'simplefin_password')&.value
 
-      if username.blank? || password.blank?
-        Rails.logger.error "[#{linkage.id}] Missing credentials for SimpleFIN"
-        Rails.logger.info "[#{linkage.id}] Setting Linkage Status to 'Error'"
-        linkage.update(sync_status: :error)
-        maybe_client.close
-        return
-      else
-        simplefin_client = SimplefinClient.new(username, password)
+      unless username && password
+        log(linkage, "Missing credentials for SimpleFIN", :error)
+        return set_status(linkage, :error)
       end
 
+      simplefin_client = SimplefinClient.new(username, password)
+
       lookback_days = Setting.find_by(key: 'lookback_days')&.value.to_i
-      lookback_days = 7 if lookback_days.zero?  # Fallback to 7 if the value is nil or non-numeric
+      lookback_days = 7 if lookback_days.nil? || lookback_days <= 0  # Fallback to 7 if the value is nil or non-numeric
       lookback_date = (Time.now - (lookback_days * 24 * 60 * 60))
       start_date = lookback_date.to_i
 
-      Rails.logger.info "[#{linkage.id}] Searching for Maybe transactions since #{lookback_date.strftime("%m/%d/%Y")}"
+      log(linkage, "Searching for Maybe transactions since #{lookback_date.strftime("%m/%d/%Y")}")
       transactions_in_maybe = maybe_client.get_simplefin_transactions(maybe_account.identifier, start_date)
-      Rails.logger.info "[#{linkage.id}] Retrieved #{transactions_in_maybe.length} Maybe transactions"
-      Rails.logger.info "[#{linkage.id}] Searching for SimpleFIN transactions since #{lookback_date.strftime("%m/%d/%Y")}"
+      log(linkage, "Retrieved #{transactions_in_maybe.length} Maybe transactions")
+      log(linkage, "Searching for SimpleFIN transactions since #{lookback_date.strftime("%m/%d/%Y")}")
       simplefin_response = simplefin_client.get_transactions(simplefin_account.identifier, start_date)
       
       if simplefin_response[:success]
-        simplefin_account_with_balance = simplefin_response[:response].dig("accounts").first
-        simplefin_transactions = simplefin_response[:response].dig("accounts").first&.dig("transactions") || []
-        Rails.logger.info "[#{linkage.id}] Retrieved #{simplefin_transactions.length} SimpleFIN transactions"
+        simplefin_account_with_balance = simplefin_response[:response]&.dig("accounts")&.first
+        if simplefin_account_with_balance.nil?
+          log(linkage, simplefin_response[:error_message], :error)
+          return set_status(linkage, :error)
+        end
+        simplefin_transactions = simplefin_account_with_balance&.dig("transactions") || []
+        log(linkage, "Retrieved #{simplefin_transactions.length} SimpleFIN transactions")
     
         simplefin_transactions.each do |simplefin_transaction|
+          next if simplefin_transaction.nil?
           transaction_id = simplefin_transaction.dig("id")
     
           # If this transaction hasn't been synced yet, create a new transaction in Maybe
           unless transactions_in_maybe.any? { |t| t["plaid_id"] == transaction_id }
 
-            if maybe_account.accountable_type == "Investment" # Investment
-              description = simplefin_transaction.dig("description")
-              if description.match?(/(CONTRIBUTIONS|INTEREST PAYMENT|AUTO CLEARING HOUSE FUND)/i) && simplefin_transaction.dig("amount").to_f > 0  #todo: make these regex settings
-                Rails.logger.info "[#{linkage.id}] Adding transaction with plaid_id='#{transaction_id}'"
-                maybe_client.new_transaction(maybe_account.identifier, simplefin_transaction, simplefin_account.currency)
-              elsif description.match?(/(RECORDKEEPING|MANAGEMENT|WRAP) FEE/i) && simplefin_transaction.dig("amount").to_f < 0  #todo: make these regex settings
-                Rails.logger.info "[#{linkage.id}] Adding transaction with plaid_id='#{transaction_id}'"
-                maybe_client.new_transaction(maybe_account.identifier, simplefin_transaction, simplefin_account.currency)
-              end
-            else # CreditCard,Despository,Loan
-              Rails.logger.info "[#{linkage.id}] Adding transaction with plaid_id='#{transaction_id}'"
+            if should_sync_transaction?(maybe_account.accountable_type, simplefin_transaction)
+              log(linkage, "Adding transaction with plaid_id='#{transaction_id}'")
               maybe_client.new_transaction(maybe_account.identifier, simplefin_transaction, simplefin_account.currency)
             end
           end
         end
         if maybe_account.accountable_type == "Investment" # Investment
-          Rails.logger.info "[#{linkage.id}] Updating Balance for '#{Time.at(simplefin_account_with_balance.dig("balance-date")).strftime("%m/%d/%Y")}'"
+          log(linkage, "Updating Balance for '#{Time.at(simplefin_account_with_balance.dig("balance-date")).strftime("%m/%d/%Y")}'")
           maybe_client.upsert_account_valuation(maybe_account.identifier, simplefin_account_with_balance)
         end
       else
-        Rails.logger.error "[#{linkage.id}] Failed to retrieve data from SimpleFIN"
-        Rails.logger.info "[#{linkage.id}] Setting Linkage Status to 'Error'"
-        linkage.update(sync_status: :error)
+        log(linkage, "Failed to retrieve data from SimpleFIN", :error)
+        set_status(linkage, :error)
       end
-      Rails.logger.info "[#{linkage.id}] Setting Linkage Status to 'Complete'"
+      log(linkage, "Setting Linkage Status to 'Complete'")
       linkage.update(sync_status: :complete, last_sync: Time.current)
-      maybe_client.close
     rescue Net::ReadTimeout, ActiveRecord::StatementInvalid, NoMethodError => e
-      Rails.logger.error "[#{linkage.id}] An error occurred: #{e.message}"
-      Rails.logger.info "[#{linkage.id}] Setting Linkage Status to 'Error'"
-      linkage.update(sync_status: :error)
-      maybe_client.close
+      log(linkage, "An error occurred: #{e.message}", :error)
+      set_status(linkage, :error)
+    rescue => e
+      log(linkage, "Unexpected error occurred: #{e.message}", :error)
+      set_status(linkage, :error)
+    ensure
+      maybe_client&.close
     end
   end
+
+  private
+
+  def log(linkage, message, level = :info)
+    Rails.logger.public_send(level, "[#{linkage.id}] #{message}")
+  end
+
+  def set_status(linkage, status)
+    linkage.update(sync_status: status)
+    log(linkage, "Setting Linkage Status to '#{status}'")
+  end
+
+  def should_sync_transaction?(account_type, transaction)
+    description = transaction.dig("description")
+    amount = transaction.dig("amount").to_f
+  
+    return false unless description
+  
+    if account_type == "Investment"
+      return true if description.match?(/(CONTRIBUTIONS|INTEREST PAYMENT|AUTO CLEARING HOUSE FUND)/i) && amount > 0
+      return true if description.match?(/(RECORDKEEPING|MANAGEMENT|WRAP) FEE/i) && amount < 0
+      return false
+    end
+  
+    true
+  end  
 end
   
