@@ -2,7 +2,7 @@
 
 ![home page](docs/assets/images/sftm-home.png)
 
-A project to synchronize transaction data from [SimpleFIN](https://beta-bridge.simplefin.org/) to a self-hosted [Maybe](https://github.com/maybe-finance/maybe) instance.
+A project to synchronize transaction data from [SimpleFIN](https://beta-bridge.simplefin.org/) to a self-hosted [Maybe](https://github.com/maybe-finance/maybe) instance, set up as a docker container.
 
 ## Premise
 
