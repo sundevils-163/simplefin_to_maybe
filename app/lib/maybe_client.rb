@@ -56,9 +56,6 @@ class MaybeClient
   end
 
   def get_accounts(family_id = nil)
-    family_id ||= get_families.first&.dig("id")
-    return [] if family_id.nil?
-  
     query = <<-SQL
       SELECT
         id,
@@ -68,11 +65,15 @@ class MaybeClient
         accountable_type,
         subtype
       FROM public.accounts
-      WHERE family_id = $1;
     SQL
   
-    execute(query, [family_id])
-  end
+    if family_id
+      query += " WHERE family_id = $1"
+      execute(query, [family_id])
+    else
+      execute(query)
+    end
+  end  
   
   def get_simplefin_transactions(account_id, start_date)
     query = <<-SQL
