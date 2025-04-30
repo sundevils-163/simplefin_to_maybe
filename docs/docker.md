@@ -42,6 +42,13 @@ To do this, run the following command:
 touch .env
 ```
 
+Alternatively, retrieve the `.env.example` file with the following command:
+
+```bash
+# Download the sample compose.yml file from the Github repository
+curl -o .env https://raw.githubusercontent.com/steveredden/simplefin_to_maybe/main/.env.example
+```
+
 #### Generate the app secret key
 
 The app requires an environment variable called `SECRET_KEY_BASE` to run.
@@ -69,6 +76,12 @@ Update this file's keys with appropriate values, example:
 ```txt
 SECRET_KEY_BASE="replacemewiththegeneratedstringfromthepriorstep"
 POSTGRES_PASSWORD="replacemewithyourdesireddatabasepassword"
+
+TZ="America/Chicago"
+RAILS_FORCE_SSL="false"
+RAILS_ASSUME_SSL="false"
+POSTGRES_DB="simplefin_to_maybe"
+POSTGRES_USER="simplefin_to_maybe"
 ```
 
 ### Step 4: Run the app
