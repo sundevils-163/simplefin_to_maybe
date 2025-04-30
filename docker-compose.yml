@@ -2,13 +2,13 @@ x-db-env: &db_env
   POSTGRES_USER: ${POSTGRES_USER:-simplefin_to_maybe}
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-simplefin_to_maybe}
   POSTGRES_DB: ${POSTGRES_DB:-simplefin_to_maybe}
-  TZ: ${TZ}
+  TZ: ${TZ:-America/Chicago}
 
 x-rails-env: &rails_env
   <<: *db_env
   SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-  RAILS_FORCE_SSL: "false"
-  RAILS_ASSUME_SSL: "false"
+  RAILS_FORCE_SSL: ${RAILS_FORCE_SSL:-false}
+  RAILS_ASSUME_SSL: ${RAILS_ASSUME_SSL:-false}
   DB_HOST: db
   DB_PORT: 5432
 
