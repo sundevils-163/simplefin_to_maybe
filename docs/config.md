@@ -3,6 +3,7 @@
 ## Pre-requisites
 
 1. A SimpleFIN [Access Token (Step 2)](https://beta-bridge.simplefin.org/info/developers)
+   * Written guide herein:  [Getting your username+password from an Access Token](./simplefin-auth.md)
 1. An exposed port to your self-hosted Maybe instance's PostgreSQL container/database
 
 ## Configuration
