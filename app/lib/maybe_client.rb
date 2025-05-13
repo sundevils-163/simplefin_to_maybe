@@ -51,6 +51,14 @@ class MaybeClient
     execute("SELECT version FROM public.schema_migrations ORDER BY version DESC LIMIT 1")&.first&.dig("version")&.to_i
   end
 
+  def valuation_key
+    @valuation_key
+  end
+
+  def transaction_key
+    @transaction_key
+  end
+
   def get_families
     execute("SELECT id, name FROM public.families")
   end
@@ -73,7 +81,17 @@ class MaybeClient
     else
       execute(query)
     end
-  end  
+  end
+
+  def get_account_by_id(account_id)
+    query = <<-SQL
+      SELECT *
+      FROM public.accounts
+      WHERE id = $1
+    SQL
+
+    execute(query, [account_id]).first
+end
   
   def get_simplefin_transactions(account_id, start_date)
     query = <<-SQL
@@ -86,12 +104,19 @@ class MaybeClient
     execute(query, [account_id, start_date])
   end
 
-  def entry_exists?(account_id, date, type)
+  def entry_exists?(account_id, date, type, name = nil)
     query = <<~SQL
       SELECT id FROM #{@entries_table}
-      WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) AND entryable_type = $3 LIMIT 1
+      WHERE account_id = $1 AND date = (TO_TIMESTAMP($2)::DATE) AND entryable_type = $3
     SQL
-    execute(query, [account_id, date, type]).first
+
+    if name
+      query += " AND name = $4 LIMIT 1"
+      execute(query, [account_id, date, type, name]).first
+    else
+      query += " LIMIT 1"
+      execute(query, [account_id, date, type]).first
+    end
   end  
 
   def upsert_account_valuation(account_id, simplefin_account)
@@ -148,12 +173,7 @@ class MaybeClient
     end
   end
   
-  def new_transaction(account_id, simplefin_transaction_record, currency)
-    amount = simplefin_transaction_record.dig("amount")
-    short_date = simplefin_transaction_record.dig("posted")
-    display_name = simplefin_transaction_record.dig("description")
-    simplefin_txn_id = simplefin_transaction_record.dig("id")
-
+  def new_transaction(account_id, amount, short_date, display_name, simplefin_txn_id, currency)
     transaction_uuid = SecureRandom.uuid
     adjusted_amount = BigDecimal(amount.to_s) * -1
   
