@@ -1,4 +1,12 @@
 Rails.application.routes.draw do
+  resources :mortgages do
+    member do
+      post :sync
+    end
+    collection do
+      post :run_all_syncs
+    end
+  end
 
   resources :linkages, only: [:index, :create, :update, :destroy] do
     member do
@@ -18,6 +26,8 @@ Rails.application.routes.draw do
   patch '/settings/:key', to: 'settings#update', as: 'update_setting'
 
   post '/reset_database', to: 'database#reset'
+
+  mount GoodJob::Engine => 'good_job'
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
