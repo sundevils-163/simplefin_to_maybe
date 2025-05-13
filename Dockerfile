@@ -22,7 +22,7 @@ FROM base AS build
 
 # Install packages needed to build gems
 RUN apt-get update && \
-    install --no-install-recommends -y build-essential libpq-dev git pkg-config
+    apt-get install --no-install-recommends -y build-essential libpq-dev git pkg-config
 
 # Install application gems
 COPY .ruby-version Gemfile Gemfile.lock ./
