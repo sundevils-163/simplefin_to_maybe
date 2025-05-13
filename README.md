@@ -18,7 +18,9 @@ Once linked, you can define a cron schedule for automatic synchronization of tra
 
 ## Configuration Instructions
 
-[Web App Configuration](docs/config.md)
+[Web App Configuration](docs/config.md) - Get started in the GUI
+
+[Mortgages Configuration](docs/mortgage-sync.md) - Insert Interest and Escrow offsetting transactions
 
 ## Recommendations
 
@@ -34,5 +36,6 @@ Also refresh (F5) your browser often.
 - [x] Balances
 - [X] Docker Compose
 - [X] Web UI
+- [X] Interest & Escrow Offsets
 - [ ] Securities/Trades/Holdings
 - [ ] More...?
