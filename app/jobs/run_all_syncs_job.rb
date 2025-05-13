@@ -25,6 +25,6 @@ class RunAllSyncsJob < ApplicationJob
     end
 
     # Schedule the next sync
-    update_cron_schedule unless dont_schedule_followup  #app/lib/cron_scheduler.rb
+    update_cron_schedule(RunAllSyncsJob) unless dont_schedule_followup  #app/lib/cron_scheduler.rb
   end
 end
