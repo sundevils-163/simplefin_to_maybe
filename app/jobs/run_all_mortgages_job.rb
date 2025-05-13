@@ -1,6 +1,6 @@
 require 'net/http'
 
-class RunAllSyncsJob < ApplicationJob
+class RunAllMortgagesJob < ApplicationJob
   include CronScheduler  #app/lib/cron_scheduler.rb
   #include JobLogger      #app/lib/job_logger.rb
 
@@ -10,7 +10,7 @@ class RunAllSyncsJob < ApplicationJob
 
     # Make the HTTP request
     port = ENV['PORT'] || '3000'
-    url = "http://localhost:#{port}/linkages/run_all_syncs"
+    url = "http://localhost:#{port}/mortgages/run_all_syncs"
     uri = URI.parse(url)
 
     Rails.logger.info "POST'ing to #{url}"
@@ -25,6 +25,6 @@ class RunAllSyncsJob < ApplicationJob
     end
 
     # Schedule the next sync
-    update_cron_schedule(RunAllSyncsJob) unless dont_schedule_followup  #app/lib/cron_scheduler.rb
+    update_cron_schedule(RunAllMortgagesJob) unless dont_schedule_followup  #app/lib/cron_scheduler.rb
   end
 end
