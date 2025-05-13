@@ -70,7 +70,7 @@ class SyncLinkageJob < ApplicationJob
               short_date = simplefin_transaction.dig("posted")
               display_name = simplefin_transaction.dig("description")
               simplefin_txn_id = simplefin_transaction.dig("id")
-              maybe_client.new_transaction(maybe_account.identifier, amount, shot_date, display_name, simplefin_txn_id, currency)
+              maybe_client.new_transaction(maybe_account.identifier, amount, short_date, display_name, simplefin_txn_id, currency)
             end
           end
         end
