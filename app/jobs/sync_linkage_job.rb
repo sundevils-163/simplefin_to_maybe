@@ -66,7 +66,11 @@ class SyncLinkageJob < ApplicationJob
             if should_sync_transaction?(maybe_account.accountable_type, simplefin_transaction)
               log(linkage, "Adding transaction with plaid_id='#{transaction_id}'")
               currency = simplefin_account.currency || maybe_account.currency || "USD"
-              maybe_client.new_transaction(maybe_account.identifier, simplefin_transaction, currency)
+              amount = simplefin_transaction.dig("amount")
+              short_date = simplefin_transaction.dig("posted")
+              display_name = simplefin_transaction.dig("description")
+              simplefin_txn_id = simplefin_transaction.dig("id")
+              maybe_client.new_transaction(maybe_account.identifier, amount, shot_date, display_name, simplefin_txn_id, currency)
             end
           end
         end
