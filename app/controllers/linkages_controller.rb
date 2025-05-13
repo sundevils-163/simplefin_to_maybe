@@ -36,7 +36,6 @@ class LinkagesController < ApplicationController
   end
 
   def destroy
-    @linkage = Linkage.find(params[:id])
     @linkage.destroy
     redirect_to linkages_path, notice: 'Linkage deleted successfully.'
   end
