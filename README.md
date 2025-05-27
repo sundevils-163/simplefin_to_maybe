@@ -24,11 +24,11 @@ Once linked, you can define a cron schedule for automatic synchronization of tra
 
 ## Recommendations
 
-In Maybe, manually sync your accounts frequently.
+~~In Maybe, manually sync your accounts frequently.~~
 
-![refresh](/docs/assets/images/account-sync.png)
+~~Also refresh (F5) your browser often.~~
 
-Also refresh (F5) your browser often.
+Manually syncing has been removed from the web UI, however you can still execute syncs from the `rails console` - [details here](docs/manual_sync.md)
 
 ## To Do
 
