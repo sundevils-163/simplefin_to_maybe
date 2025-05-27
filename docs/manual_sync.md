@@ -33,3 +33,9 @@ Account.find_each do |account|
   )
 end
 ```
+
+## One-Liner
+
+```sh
+docker exec -it $(docker ps --filter "name=maybe-app" --format "{{.ID}}" | head -n1) bash -c "bundle exec rails runner 'Family.find_each { |family| family.sync_later(window_start_date: 1.day.ago, window_end_date: Time.current) }'"
+```
