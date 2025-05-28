@@ -1,8 +1,8 @@
-# Mortgage Sync
+# Mortgage & Loan Sync
 
 ## Problem and Solution
 
-When paying monthly towards a mortgage, your money likely goes towards multiple balances:
+When paying monthly towards a mortgage or loan, your money likely goes towards multiple balances:
 
 1. Principal
 1. Interest
@@ -22,11 +22,13 @@ Escrow is typically static and divided evenly over the course of a year
 
 ## Setup
 
-Access the **Mortgages** feature in the top dropdown menu:
+Access the **Mortgage/Loans** feature in the top dropdown menu:
 
 ![dropdown menu](assets/images/mortgage-dropdown.png)
 
-Choose a *Maybe* account of type `Loan`, specify your **APR**, **Escrow Payment** (or `0` if you do not wish to create an Escrow transaction), and **Day of Month** to create the transactions on:
+Choose a *Maybe* account of type `Loan`, specify your **APR**, **Escrow Payment** (or `0` if you do not wish to create an Escrow transaction), and **Day of Month** to create the transactions on.
+
+If you'd the inserted transactions to be considered `One-Time` in *Maybe* (and thus \*not\* included in Budgeting, etc.), use the **Exclude** checkbox:
 
 ![loan config](assets/images/mortgages-config.png)
 

@@ -1,10 +1,10 @@
 <br>
 <div class="top-pane">
-  <h2 class="text-2xl font-semibold mb-4">Mortgages</h2>
+  <h2 class="text-2xl font-semibold mb-4">Mortgage / Loans</h2>
   <h3 class="text-2x1 font-semibold mb-2">Entries here will insert the following transactions on the given <i>Day of Month</i>:</h3>
   <ul class="list-disc list-inside">
-    <li><strong>Escrow Payment Offset</strong>: The raw value from <i>Escrow Payment</i></li>
     <li><strong>Interest Payment Offset</strong>: <code>current balance * (apr / 100 / 12)</code></li>
+    <li><strong>Escrow Payment Offset</strong>: The raw value from <i>Escrow Payment</i></li>
   </ul>
   <br>
   <table class="bg-white shadow-md rounded-lg overflow-hidden">
@@ -15,6 +15,7 @@
         <th class="py-2 px-4 border-b text-left">APR</th>
         <th class="py-2 px-4 border-b text-left">Escrow Payment</th>
         <th class="py-2 px-4 border-b text-left">Day of Month</th>
+        <th class="py-2 px-4 border-b text-left">Exclude? <span class="tooltip-icon" data-tooltip="<%= send("exclude_information") %>">ⓘ</span></th>
         <th class="py-2 px-4 border-b text-center"></th>
       </tr>
     </thead>
@@ -47,6 +48,7 @@
           <td class="py-2 px-4 border-b"><%= mortgage.apr %>%</td>
           <td class="py-2 px-4 border-b text-right"><%= number_with_precision(mortgage.escrow_payment, precision: 2) %></td>
           <td class="py-2 px-4 border-b text-right"><%= mortgage.day_of_month %></td>
+          <td class="py-2 px-4 border-b text-center"><%= mortgage.exclude %></td>
           <td class="py-2 px-4 border-b text-center">
             <%= button_to mortgage_path(mortgage), method: :delete, data: {}, class: "text-blue-500 hover:text-blue-700" do %>
               <i class="fas fa-trash-alt"></i>
@@ -65,8 +67,9 @@
       <tr class="bg-gray-200">
         <th class="py-2 px-4 border-b text-left">Maybe Account</th>
         <th class="py-2 px-4 border-b text-left">APR</th>
-        <th class="py-2 px-4 border-b text-left">Escrow Payment</th>
+        <th class="py-2 px-4 border-b text-left">Escrow Payment <span class="tooltip-icon" data-tooltip="<%= send("escrow_information") %>">ⓘ</span></th>
         <th class="py-2 px-4 border-b text-left">Day of Month</th>
+        <th class="py-2 px-4 border-b text-left">Exclude? <span class="tooltip-icon" data-tooltip="<%= send("exclude_information") %>">ⓘ</span></th>
         <th class="py-2 px-4 border-b text-center"></th>
       </tr>
     </thead>
@@ -75,7 +78,7 @@
         <tr class="border-t hover:bg-gray-50">
           <td class="py-2 px-4">
             <% if @unused_maybe_accounts.present? %>
-              <%= form.select :maybe_account_id, options_for_select(@maybe_accounts.order(:display_name).map { |account| [account.display_name, account.id] }, @mortgage.maybe_account_id), prompt: maybe_account_prompt, class: "block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
+              <%= form.select :maybe_account_id, options_for_select(@maybe_accounts.order(:display_name).map { |account| [account.display_name, account.id, { "data-apr": account.apr }] }, @mortgage.maybe_account_id), prompt: maybe_account_prompt, class: "block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
             <% else %>
               <p><a href="/settings" class="text-blue-500 hover:text-blue-700">There are no unlinked loans! Click here to configure.</a></p>
             <% end %>
@@ -88,6 +91,11 @@
           </td>
           <td class="py-2 px-4">
             <%= form.number_field :day_of_month, in: 1..31, class: "block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
+          </td>
+          <td class="py-2 px-4">
+            <div class="flex items-center justify-center">
+              <%= form.check_box :exclude, { class: "h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" }, true, false %>
+            </div>
           </td>
           <td class="py-2 px-4 text-center">
             <%= form.submit "Save", class: "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400", id: 'save-button', disabled: true %>
@@ -125,7 +133,17 @@
     }
 
     // Add event listeners to fields
-    maybeSelect.addEventListener('change', toggleSaveButton);
+    maybeSelect.addEventListener('change', function () {
+      const selectedOption = maybeSelect.options[maybeSelect.selectedIndex];
+      const aprValue = selectedOption.dataset.apr;
+
+      if (aprValue) {
+        aprInput.value = aprValue;
+        aprInput.dispatchEvent(new Event('input')); // Trigger validation toggle
+      }
+
+      toggleSaveButton(); // Re-run button enable logic
+    });
     aprInput.addEventListener('input', toggleSaveButton);
     escrowInput.addEventListener('input', toggleSaveButton);
     dayOfMonthInput.addEventListener('input', toggleSaveButton);

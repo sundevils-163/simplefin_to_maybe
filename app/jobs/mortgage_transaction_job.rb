@@ -37,15 +37,16 @@ class MortgageTransactionJob < ApplicationJob
     
     interest_tx_name = "Interest Payment Offset"
     escrow_tx_name = "Escrow Payment Offset"
+    one_time = (mortgage.exclude == true)
 
     unless maybe_client.entry_exists?(maybe_account.identifier, Time.now.to_i, maybe_client.transaction_key, interest_tx_name)
       log(mortgage, "Adding transaction '#{interest_tx_name}' of #{interest_due}")
-      maybe_client.new_transaction(maybe_account.identifier, (interest_due * -1), Time.now.to_i, interest_tx_name, SecureRandom.uuid, currency)
+      maybe_client.new_transaction(maybe_account.identifier, (interest_due * -1), Time.now.to_i, interest_tx_name, SecureRandom.uuid, currency, one_time)
     end
     
     unless 0 == mortgage.escrow_payment.to_d || maybe_client.entry_exists?(maybe_account.identifier, Time.now.to_i, maybe_client.transaction_key, escrow_tx_name)
       log(mortgage, "Adding transaction '#{escrow_tx_name}' of #{mortgage.escrow_payment}")
-      maybe_client.new_transaction(maybe_account.identifier, (mortgage.escrow_payment.to_d * -1), Time.now.to_i, escrow_tx_name, SecureRandom.uuid, currency)
+      maybe_client.new_transaction(maybe_account.identifier, (mortgage.escrow_payment.to_d * -1), Time.now.to_i, escrow_tx_name, SecureRandom.uuid, currency, one_time)
     end
   end
 

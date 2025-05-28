@@ -3,7 +3,7 @@
 #### Connect to bash shell of your maybe-app container
 
 ```sh
-docker exec -it $(docker ps --filter "name=maybe-app" --format "{{.ID}}" | head -n1) bash
+docker exec -it $(docker ps --filter "name=maybe-web" --format "{{.ID}}" | head -n1) bash
 ```
 
 #### Start the rails console
@@ -37,5 +37,5 @@ end
 ## One-Liner
 
 ```sh
-docker exec -it $(docker ps --filter "name=maybe-app" --format "{{.ID}}" | head -n1) bash -c "bundle exec rails runner 'Family.find_each { |family| family.sync_later(window_start_date: 1.day.ago, window_end_date: Time.current) }'"
+docker exec -it $(docker ps --filter "name=maybe-web" --format "{{.ID}}" | head -n1) bash -c "bundle exec rails runner 'Family.find_each { |family| family.sync_later(window_start_date: 1.day.ago, window_end_date: Time.current) }'"
 ```
