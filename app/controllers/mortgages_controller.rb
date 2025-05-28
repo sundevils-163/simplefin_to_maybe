@@ -63,7 +63,7 @@ class MortgagesController < ApplicationController
     # Only allow a list of trusted parameters through.
     def mortgage_params
       if action_name == 'create'
-        permitted_params = params.require(:mortgage).permit(:maybe_account_id, :apr, :escrow_payment, :principal_payment, :day_of_month)
+        permitted_params = params.require(:mortgage).permit(:maybe_account_id, :apr, :escrow_payment, :principal_payment, :day_of_month, :exclude)
       elsif action_name == 'update'
         permitted_params = params.require(:mortgage).permit(:enabled)
         permitted_params[:enabled] = (permitted_params[:enabled] == "on")  # on/off to true/false
