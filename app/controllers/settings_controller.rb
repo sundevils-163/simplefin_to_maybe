@@ -90,6 +90,7 @@ class SettingsController < ApplicationController
         display_name = account_data.dig("name")
         family_id = account_data.dig("family_id")
         currency = account_data.dig("currency")
+        apr = account_data.dig("interest_rate")
       else
         raise ArgumentError, "Invalid account_type: #{account_type}"
       end
@@ -98,6 +99,7 @@ class SettingsController < ApplicationController
         account.accountable_type = accountable_type if accountable_type
         account.maybe_family_id = family_id if family_id
         account.currency = currency if currency
+        account.apr = apr if apr
       end
     end
   end

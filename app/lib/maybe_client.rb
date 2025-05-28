@@ -66,13 +66,15 @@ class MaybeClient
   def get_accounts(family_id = nil)
     query = <<-SQL
       SELECT
-        id,
-        name,
-        family_id,
-        currency,
-        accountable_type,
-        subtype
-      FROM public.accounts
+        a.id,
+        a.name,
+        a.family_id,
+        a.currency,
+        a.accountable_type,
+        a.subtype,
+        l.interest_rate
+      FROM public.accounts AS a
+      LEFT OUTER JOIN public.loans AS l ON a.accountable_id = l.id
     SQL
   
     if family_id
@@ -173,19 +175,20 @@ end
     end
   end
   
-  def new_transaction(account_id, amount, short_date, display_name, simplefin_txn_id, currency)
+  def new_transaction(account_id, amount, short_date, display_name, simplefin_txn_id, currency, one_time)
     transaction_uuid = SecureRandom.uuid
     adjusted_amount = BigDecimal(amount.to_s) * -1
+    excluded = (one_time == true)
   
     # Insert the entries entry
     query = <<-SQL
       INSERT INTO #{@entries_table} (
-        account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at, plaid_id
+        account_id, entryable_type, entryable_id, amount, currency, date, name, created_at, updated_at, plaid_id, excluded
       ) VALUES (
-        $1, $2, $3, $4, $5, (TO_TIMESTAMP($6)::DATE), $7, NOW(), NOW(), $8
+        $1, $2, $3, $4, $5, (TO_TIMESTAMP($6)::DATE), $7, NOW(), NOW(), $8, $9
       );
     SQL
-    execute(query, [account_id, @transaction_key, transaction_uuid, adjusted_amount, currency, short_date, display_name, simplefin_txn_id])
+    execute(query, [account_id, @transaction_key, transaction_uuid, adjusted_amount, currency, short_date, display_name, simplefin_txn_id, excluded])
   
     # Insert the transaction entry
     query = <<-SQL
