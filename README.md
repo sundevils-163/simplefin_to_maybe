@@ -20,7 +20,7 @@ Once linked, you can define a cron schedule for automatic synchronization of tra
 
 [Web App Configuration](docs/config.md) - Get started in the GUI
 
-[Mortgages Configuration](docs/mortgage-sync.md) - Insert Interest and Escrow offsetting transactions
+[Mortgage & Loans Configuration](docs/mortgage-sync.md) - Insert Interest (and optionally Escrow) offsetting transactions
 
 ## Recommendations
 
@@ -28,7 +28,9 @@ Once linked, you can define a cron schedule for automatic synchronization of tra
 
 ~~Also refresh (F5) your browser often.~~
 
-Manually syncing has been removed from the web UI, however you can still execute syncs from the `rails console` - [details here](docs/manual_sync.md)
+Manually syncing has been removed from the web UI.
+
+However, you can still execute syncs from the `rails console` - [details here](docs/manual_sync.md)
 
 ## To Do
 
@@ -36,6 +38,7 @@ Manually syncing has been removed from the web UI, however you can still execute
 - [x] Balances
 - [X] Docker Compose
 - [X] Web UI
-- [X] Interest & Escrow Offsets
+- [X] Loan Interest & Escrow Offsets
+- [ ] Property Valuations
 - [ ] Securities/Trades/Holdings
 - [ ] More...?
