@@ -52,3 +52,10 @@ Sync.where(status: [:pending, :syncing])
       sync.mark_stale!
     end
 ```
+
+### Via /sidekiq
+
+If you authenticate to your host/sidekiq with default credentials (`maybe`:`maybe`) you can enuque the `clean_syncs` which marks >24hrs syncs stale
+
+![image](https://github.com/user-attachments/assets/331c356f-6819-4312-9fe9-677c9d5be9a0)
+
