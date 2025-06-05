@@ -55,7 +55,7 @@ Sync.where(status: [:pending, :syncing])
 
 ### Via /sidekiq
 
-If you authenticate to your host/sidekiq with default credentials (`maybe`:`maybe`) you can enuque the `clean_syncs` which marks >24hrs syncs stale
+If you authenticate to your *web-fqdn*/sidekiq path (eg *https://mymaybe.tld/sidekiq*) with default credentials (`maybe`:`maybe`) you can enqueue the `clean_syncs` which marks >24hrs syncs stale
 
 ![image](https://github.com/user-attachments/assets/331c356f-6819-4312-9fe9-677c9d5be9a0)
 
