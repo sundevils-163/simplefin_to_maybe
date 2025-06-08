@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-app
+  labels:
+    {{- include "maybe.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "maybe.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "maybe.labels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: simplefin_to_maybe
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: RAILS_ENV
+          value: {{ .Values.maybe.env.RAILS_ENV }}
+        - name: TZ
+          value: "America/Chicago"
+        - name: DATABASE_URL
+          value: "postgresql://simplefin_to_maybe:simplefin_to_maybe@{{ .Release.Name }}-postgres:5432/simplefin_to_maybe?sslmode=disable"
+        - name: RAILS_FORCE_SSL
+          value: "{{ .Values.maybe.env.RAILS_FORCE_SSL }}"
+        - name: RAILS_ASSUME_SSL
+          value: "{{ .Values.maybe.env.RAILS_ASSUME_SSL }}"
+        - name: SECRET_KEY_BASE
+          valueFrom:
+           secretKeyRef:
+            name: maybe-secrets
+            key: secret-key-base
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5

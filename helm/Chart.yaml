@@ -1,0 +1,5 @@
+apiVersion: v2
+name: maybe
+description: A Helm chart for self-hosting SimpleFIN to Maybe Sync app
+version: 0.0.1
+appVersion: "0.0.1"

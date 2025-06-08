@@ -1,0 +1,30 @@
+replicaCount: 1
+
+image:
+  repository: junzhutx/simplefin-maybe-homelab
+  tag: "0.0.1" # Or pin to "v0.2.0-rc2"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  hostname: simplefintomaybe.lan
+  ingressClassName: nginx # Adjust if using a different ingress controller
+
+maybe:
+  env:
+    RAILS_ENV: production
+    SELF_HOSTED: "true"
+    RAILS_FORCE_SSL: "false"
+    RAILS_ASSUME_SSL: "false"
+    GOOD_JOB_EXECUTION_MODE: "async"
+
+postgres:
+  enabled: true
+  image: postgres:16
+  username: simplefin_to_maybe
+  password: simplefin_to_maybe
+  database: simplefin_to_maybe
