@@ -15,7 +15,7 @@ spec:
         {{- include "maybe.labels" . | nindent 8 }}
     spec:
       containers:
-      - name: simplefin_to_maybe
+      - name: simplefin-to-maybe
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
@@ -32,7 +32,7 @@ spec:
         - name: SECRET_KEY_BASE
           valueFrom:
            secretKeyRef:
-            name: maybe-secrets
+            name: simplefin-maybe-secrets
             key: secret-key-base
         ports:
         - containerPort: 3000
